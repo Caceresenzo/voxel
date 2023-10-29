@@ -37,7 +37,6 @@ public class Player extends Camera {
 		handleKeyboard();
 		handleMouse();
 		super.update();
-
 		
 //		System.out.println("x=%3.2f y=%3.2f z=%3.2f yaw=%3.2f pitch=%3.2f".formatted(getPosition().x, getPosition().y, getPosition().z, getYaw(), getPitch()));
 	}
@@ -60,12 +59,12 @@ public class Player extends Camera {
 			final var delta = position.sub(lastPosition, new Vector2i());
 			if (delta.y != 0) {
 				rotatePitch(delta.y * Settings.MOUSE_SENSITIVITY);
-				System.out.println("rotatePitch");
+				// System.out.println("rotatePitch");
 			}
 			
 			if (delta.x != 0) {
 				rotateYaw(delta.x * Settings.MOUSE_SENSITIVITY);
-				System.out.println("rotateYaw");
+				// System.out.println("rotateYaw");
 			}
 		}
 		
@@ -78,32 +77,32 @@ public class Player extends Camera {
 		
 		if (glfwGetKey(Main.window, GLFW_KEY_Z) == GLFW_PRESS || glfwGetKey(Main.window, GLFW_KEY_W) == GLFW_PRESS) {
 			moveForward(velocity);
-			System.out.println("moveForward");
+			// System.out.println("moveForward");
 		}
 		
 		if (glfwGetKey(Main.window, GLFW_KEY_S) == GLFW_PRESS) {
 			moveBackward(velocity);
-			System.out.println("moveBackward");
+			// System.out.println("moveBackward");
 		}
 		
 		if (glfwGetKey(Main.window, GLFW_KEY_Q) == GLFW_PRESS || glfwGetKey(Main.window, GLFW_KEY_A) == GLFW_PRESS) {
 			moveLeft(velocity);
-			System.out.println("moveLeft");
+			// System.out.println("moveLeft");
 		}
 		
 		if (glfwGetKey(Main.window, GLFW_KEY_D) == GLFW_PRESS) {
 			moveRight(velocity);
-			System.out.println("moveRight");
+			// System.out.println("moveRight");
 		}
 		
 		if (glfwGetKey(Main.window, GLFW_KEY_SPACE) == GLFW_PRESS) {
 			moveUp(velocity);
-			System.out.println("moveUp");
+			// System.out.println("moveUp");
 		}
 		
 		if (glfwGetKey(Main.window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS || glfwGetKey(Main.window, GLFW_KEY_RIGHT_CONTROL) == GLFW_PRESS) {
 			moveDown(velocity);
-			System.out.println("moveDown");
+			// System.out.println("moveDown");
 		}
 	}
 	

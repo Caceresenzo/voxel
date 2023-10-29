@@ -27,7 +27,7 @@ public class ShaderProgram {
 	
 	public ShaderProgram(Collection<Shader> shaders) {
 		this.id = link(shaders);
-		this.cleanable = GarbageCollector.register(this, () -> glDeleteProgram(id));
+		this.cleanable = GarbageCollector.registerGL(this, () -> glDeleteProgram(id));
 	}
 	
 	public void use() {
@@ -56,8 +56,16 @@ public class ShaderProgram {
 		return new Matrix4fUniform(this, name);
 	}
 	
+	protected UnsignedByteAttribute createUnsignedByteAttribute(String name) {
+		return new UnsignedByteAttribute(this, name);
+	}
+	
 	protected Vector3fAttribute createVector3fAttribute(String name) {
 		return new Vector3fAttribute(this, name, false);
+	}
+	
+	protected Vector3ubAttribute createVector3ubAttribute(String name) {
+		return new Vector3ubAttribute(this, name);
 	}
 	
 	private static int link(Collection<Shader> shaders) {

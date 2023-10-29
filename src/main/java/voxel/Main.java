@@ -61,8 +61,7 @@ import org.lwjgl.system.MemoryStack;
 import engine.shader.Shader;
 import engine.util.OpenGL;
 import lombok.SneakyThrows;
-import voxel.mesh.QuadMesh;
-import voxel.mesh.QuadShaderProgram;
+import voxel.mesh.ChunkShaderProgram;
 
 public class Main {
 	
@@ -160,7 +159,7 @@ public class Main {
 		glEnable(GL_CULL_FACE);
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		
+		// glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		initialize();
 		
 		// Run the rendering loop until the user has attempted to close
@@ -180,27 +179,27 @@ public class Main {
 	}
 	
 	Player player;
-	QuadShaderProgram quadShaderProgram;
-	QuadMesh quadMesh;
+	ChunkShaderProgram chunkShaderProgram;
+	Chunk chunk;
 	
 	@SneakyThrows
 	public void initialize() {
 		// final var fragment = Shader.load(Shader.Type.VERTEX, getClass().getResourceAsStream("/shaders/quad.vert"));
-		quadShaderProgram = new QuadShaderProgram(
-			Shader.load(Shader.Type.VERTEX, getClass().getResourceAsStream("/shaders/quad.vert")),
-			Shader.load(Shader.Type.FRAGMENT, getClass().getResourceAsStream("/shaders/quad.frag"))
+		chunkShaderProgram = new ChunkShaderProgram(
+			Shader.load(Shader.Type.VERTEX, getClass().getResourceAsStream("/shaders/chunk.vert")),
+			Shader.load(Shader.Type.FRAGMENT, getClass().getResourceAsStream("/shaders/chunk.frag"))
 		);
 		
 		OpenGL.checkErrors();
 		
-		quadMesh = new QuadMesh(quadShaderProgram);
+		chunk = new Chunk(chunkShaderProgram);
 		
 		player = new Player();
 		player.update();
 		
-		quadShaderProgram.use();
-		quadShaderProgram.projection.load(player.getProjection());
-		quadShaderProgram.model.load(new Matrix4f());
+		chunkShaderProgram.use();
+		chunkShaderProgram.projection.load(player.getProjection());
+		chunkShaderProgram.model.load(new Matrix4f());
 	}
 	
 	public void update() {
@@ -208,9 +207,9 @@ public class Main {
 	}
 	
 	public void render() {
-		quadShaderProgram.use();
-		quadShaderProgram.view.load(player.getView());
-		quadMesh.render();
+		chunkShaderProgram.use();
+		chunkShaderProgram.view.load(player.getView());
+		chunk.render();
 		OpenGL.checkErrors();
 	}
 	

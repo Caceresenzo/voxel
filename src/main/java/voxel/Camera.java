@@ -66,11 +66,13 @@ public class Camera {
 	}
 	
 	public void moveUp(float velocity) {
-		position.add(up.mul(velocity, new Vector3f()));
+//		position.add(up.mul(velocity, new Vector3f()));
+		position.add(Settings.WORLD_UP.mul(velocity, new Vector3f()));
 	}
 	
 	public void moveDown(float velocity) {
-		position.sub(up.mul(velocity, new Vector3f()));
+//		position.sub(up.mul(velocity, new Vector3f()));
+		position.sub(Settings.WORLD_UP.mul(velocity, new Vector3f()));
 	}
 	
 	public void moveForward(float velocity) {

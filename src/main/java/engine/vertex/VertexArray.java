@@ -24,7 +24,7 @@ public class VertexArray {
 		
 		this.buffers = new ArrayList<>();
 		
-		this.cleanable = GarbageCollector.register(this, () -> glDeleteVertexArrays(id));
+		this.cleanable = GarbageCollector.registerGL(this, () -> glDeleteVertexArrays(id));
 	}
 	
 	public VertexArray bind() {

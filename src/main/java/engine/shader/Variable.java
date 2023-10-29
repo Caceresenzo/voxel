@@ -1,5 +1,7 @@
 package engine.shader;
 
+import java.util.List;
+
 import lombok.Getter;
 
 @Getter
@@ -13,12 +15,15 @@ public abstract class Variable {
 		
 		this.location = findLocation(program);
 		if (this.location == -1) {
-			throw new IllegalStateException("variable not found: " + name);
+			final var available = listNames(program);
+			System.err.println("variable `%s` not found, available: %s".formatted(name, available));
 		}
 		
 		System.out.println("%s(name=%s, location=%d)".formatted(getClass().getSimpleName(), name, location));
 	}
 	
 	protected abstract int findLocation(ShaderProgram program);
+	
+	protected abstract List<String> listNames(ShaderProgram program);
 	
 }

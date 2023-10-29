@@ -30,7 +30,7 @@ public class Shader {
 	
 	private Shader(int id) {
 		this.id = id;
-		this.cleanable = GarbageCollector.register(this, () -> glDeleteShader(id));
+		this.cleanable = GarbageCollector.registerGL(this, () -> glDeleteShader(id));
 	}
 	
 	public void delete() {
