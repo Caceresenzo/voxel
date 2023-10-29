@@ -3,6 +3,8 @@ package voxel;
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
 import static org.lwjgl.glfw.GLFW.GLFW_CONTEXT_VERSION_MAJOR;
 import static org.lwjgl.glfw.GLFW.GLFW_CONTEXT_VERSION_MINOR;
+import static org.lwjgl.glfw.GLFW.GLFW_CURSOR;
+import static org.lwjgl.glfw.GLFW.GLFW_CURSOR_DISABLED;
 import static org.lwjgl.glfw.GLFW.GLFW_DEPTH_BITS;
 import static org.lwjgl.glfw.GLFW.GLFW_FALSE;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE;
@@ -23,6 +25,7 @@ import static org.lwjgl.glfw.GLFW.glfwInit;
 import static org.lwjgl.glfw.GLFW.glfwMakeContextCurrent;
 import static org.lwjgl.glfw.GLFW.glfwPollEvents;
 import static org.lwjgl.glfw.GLFW.glfwSetErrorCallback;
+import static org.lwjgl.glfw.GLFW.glfwSetInputMode;
 import static org.lwjgl.glfw.GLFW.glfwSetKeyCallback;
 import static org.lwjgl.glfw.GLFW.glfwSetWindowPos;
 import static org.lwjgl.glfw.GLFW.glfwSetWindowShouldClose;
@@ -48,6 +51,7 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 
 import java.nio.IntBuffer;
 
+import org.joml.Matrix4f;
 import org.lwjgl.Version;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWVidMode;
@@ -60,10 +64,10 @@ import lombok.SneakyThrows;
 import voxel.mesh.QuadMesh;
 import voxel.mesh.QuadShaderProgram;
 
-public class HelloWorld {
+public class Main {
 	
 	// The window handle
-	private long window;
+	public static long window;
 	
 	public void run() {
 		System.out.println("Hello LWJGL " + Version.getVersion() + "!");
@@ -100,7 +104,9 @@ public class HelloWorld {
 		glfwWindowHint(GLFW_DEPTH_BITS, 24);
 		
 		// Create the window
-		window = glfwCreateWindow(1280, 720, "Hello World!", NULL, NULL);
+		System.out.println(Settings.ASPECT_RATIO);
+		
+		window = glfwCreateWindow(Settings.WINDOW_RESOLUTION.x, Settings.WINDOW_RESOLUTION.y, "Hello World!", NULL, NULL);
 		if (window == NULL)
 			throw new RuntimeException("Failed to create the GLFW window");
 		
@@ -136,6 +142,8 @@ public class HelloWorld {
 		
 		// Make the window visible
 		glfwShowWindow(window);
+		
+		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	}
 	
 	private void loop() {
@@ -171,12 +179,14 @@ public class HelloWorld {
 		}
 	}
 	
+	Player player;
+	QuadShaderProgram quadShaderProgram;
 	QuadMesh quadMesh;
 	
 	@SneakyThrows
 	public void initialize() {
 		// final var fragment = Shader.load(Shader.Type.VERTEX, getClass().getResourceAsStream("/shaders/quad.vert"));
-		final var quadShaderProgram = new QuadShaderProgram(
+		quadShaderProgram = new QuadShaderProgram(
 			Shader.load(Shader.Type.VERTEX, getClass().getResourceAsStream("/shaders/quad.vert")),
 			Shader.load(Shader.Type.FRAGMENT, getClass().getResourceAsStream("/shaders/quad.frag"))
 		);
@@ -184,18 +194,28 @@ public class HelloWorld {
 		OpenGL.checkErrors();
 		
 		quadMesh = new QuadMesh(quadShaderProgram);
+		
+		player = new Player();
+		player.update();
+		
+		quadShaderProgram.use();
+		quadShaderProgram.projection.load(player.getProjection());
+		quadShaderProgram.model.load(new Matrix4f());
 	}
 	
 	public void update() {
+		player.update();
 	}
 	
 	public void render() {
+		quadShaderProgram.use();
+		quadShaderProgram.view.load(player.getView());
 		quadMesh.render();
 		OpenGL.checkErrors();
 	}
 	
 	public static void main(String[] args) {
-		new HelloWorld().run();
+		new Main().run();
 	}
 	
 }

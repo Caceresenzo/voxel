@@ -52,6 +52,10 @@ public class ShaderProgram {
 		return new FloatUniform(this, name);
 	}
 	
+	protected Matrix4fUniform createMatrix4fUniform(String name) {
+		return new Matrix4fUniform(this, name);
+	}
+	
 	protected Vector3fAttribute createVector3fAttribute(String name) {
 		return new Vector3fAttribute(this, name, false);
 	}

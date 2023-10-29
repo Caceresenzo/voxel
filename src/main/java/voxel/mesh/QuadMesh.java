@@ -44,9 +44,6 @@ public class QuadMesh {
 	
 	public void render() {
 		program.use();
-		
-		program.opacity.load((float) Math.sin((System.currentTimeMillis() / 100)));
-		
 		vertexArray.bind();
 		
 		glDrawArrays(GL_TRIANGLES, 0, 36);
