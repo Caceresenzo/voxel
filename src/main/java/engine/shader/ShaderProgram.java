@@ -55,6 +55,10 @@ public class ShaderProgram {
 	protected Matrix4fUniform createMatrix4fUniform(String name) {
 		return new Matrix4fUniform(this, name);
 	}
+
+	protected Sampler2dUniform createSampler2dUniform(String name) {
+		return new Sampler2dUniform(this, name);
+	}
 	
 	protected UnsignedByteAttribute createUnsignedByteAttribute(String name) {
 		return new UnsignedByteAttribute(this, name);

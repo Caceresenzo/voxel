@@ -59,6 +59,7 @@ import org.lwjgl.opengl.GL;
 import org.lwjgl.system.MemoryStack;
 
 import engine.shader.Shader;
+import engine.texture.Texture;
 import engine.util.OpenGL;
 import lombok.SneakyThrows;
 import voxel.mesh.ChunkShaderProgram;
@@ -179,6 +180,7 @@ public class Main {
 	Player player;
 	ChunkShaderProgram chunkShaderProgram;
 	Chunk chunk;
+	Texture texture;
 	
 	@SneakyThrows
 	public void initialize() {
@@ -198,6 +200,12 @@ public class Main {
 		chunkShaderProgram.use();
 		chunkShaderProgram.projection.load(player.getProjection());
 		chunkShaderProgram.model.load(new Matrix4f());
+		
+		texture = Texture.load(
+			getClass().getResourceAsStream("/textures/frame.png")
+		);
+		
+		texture.activate(0);
 	}
 	
 	public void update() {
