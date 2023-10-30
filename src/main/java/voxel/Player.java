@@ -3,8 +3,10 @@ package voxel;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_A;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_D;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT_CONTROL;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT_SHIFT;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_Q;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_RIGHT_CONTROL;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_RIGHT_SHIFT;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_S;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_W;
@@ -74,6 +76,10 @@ public class Player extends Camera {
 	private void handleKeyboard() {
 		float delta = 2f;
 		float velocity = Settings.PLAYER_SPEED * delta;
+		
+		if (glfwGetKey(Main.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS || glfwGetKey(Main.window, GLFW_KEY_RIGHT_SHIFT) == GLFW_PRESS) {
+			velocity *= 5;
+		}
 		
 		if (glfwGetKey(Main.window, GLFW_KEY_Z) == GLFW_PRESS || glfwGetKey(Main.window, GLFW_KEY_W) == GLFW_PRESS) {
 			moveForward(velocity);

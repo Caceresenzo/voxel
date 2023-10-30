@@ -61,7 +61,6 @@ public class VertexBuffer {
 		
 		final var buffer = MemoryUtil.memAlloc(data.length);
 		buffer.put(data).flip();
-		System.out.println(buffer);
 		
 		glBufferData(type.value(), buffer, usage.value());
 		MemoryUtil.memFree(buffer);

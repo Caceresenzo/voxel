@@ -8,9 +8,10 @@ public class Settings {
 	public static final Vector2i WINDOW_RESOLUTION = new Vector2i(1600, 900);
 	
 	public static final int CHUNK_SIZE = 32;
+	public static final int CHUNK_HEIGHT = 128;
 	public static final int HALF_CHUNK_SIZE = CHUNK_SIZE / 2;
 	public static final int CHUNK_AREA = CHUNK_SIZE * CHUNK_SIZE;
-	public static final int CHUNK_VOLUME = CHUNK_AREA * CHUNK_SIZE;
+	public static final int CHUNK_VOLUME = CHUNK_AREA * CHUNK_HEIGHT;
 	
 	public static final float ASPECT_RATIO = (float) WINDOW_RESOLUTION.x / WINDOW_RESOLUTION.y;
 	public static final int FOV_DEGREE = 50;

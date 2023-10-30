@@ -30,11 +30,9 @@ public class ChunkMesh {
 	
 	private VertexArray createVertexArray() {
 		final var vertexData = getVertexData();
-		System.out.println("vertexData");
 		
 		final var buffer = new VertexBuffer(BufferType.ARRAY, UsageType.STATIC_DRAW);
 		buffer.store(vertexData);
-		System.out.println("store");
 		
 		final var array = new VertexArray().add(buffer);
 		
@@ -50,7 +48,6 @@ public class ChunkMesh {
 		program.faceId.link(stride, 4);
 		
 		triangleCount = vertexData.length / stride;
-		System.out.println(triangleCount);
 		
 		return array;
 	}
@@ -64,7 +61,7 @@ public class ChunkMesh {
 	}
 	
 	private boolean isVoid(int x, int y, int z, byte[] chunkVoxels) {
-		if (isInChunk(x) && isInChunk(y) && isInChunk(z)) {
+		if (isInChunk(x) && isInChunkHeight(y) && isInChunk(z)) {
 			if (chunkVoxels[toVoxelIndex(x, y, z)] != 0) {
 				return false;
 			}
@@ -88,7 +85,7 @@ public class ChunkMesh {
 		final var orderedVectors = new Vector3i[6];
 		
 		for (var x = 0; x < Settings.CHUNK_SIZE; ++x) {
-			for (var y = 0; y < Settings.CHUNK_SIZE; ++y) {
+			for (var y = 0; y < Settings.CHUNK_HEIGHT; ++y) {
 				for (var z = 0; z < Settings.CHUNK_SIZE; ++z) {
 					// System.out.println("x=%s y=%s z=%s index=%d".formatted(x, y, z, index));
 					final var voxelId = voxels[toVoxelIndex(x, y, z)];
@@ -223,10 +220,6 @@ public class ChunkMesh {
 		final var trimmed = new byte[index];
 		System.arraycopy(vertices, 0, trimmed, 0, trimmed.length);
 		
-		// for (var i = 0; i < index; ++i) {
-		// System.out.println("[%d] = %d".formatted(i, vertices[i]));
-		// }
-		
 		return trimmed;
 	}
 	
@@ -248,12 +241,12 @@ public class ChunkMesh {
 		return 0 <= value && value < Settings.CHUNK_SIZE;
 	}
 	
-	private int toVoxelIndex(Vector3i position) {
-		return (position.x + Settings.CHUNK_SIZE * position.z + Settings.CHUNK_AREA * position.y);
+	private boolean isInChunkHeight(int value) {
+		return 0 <= value && value < Settings.CHUNK_HEIGHT;
 	}
 	
 	private int toVoxelIndex(int x, int y, int z) {
-		return (x + Settings.CHUNK_SIZE * z + Settings.CHUNK_AREA * y);
+		return (z * Settings.CHUNK_SIZE * Settings.CHUNK_HEIGHT) + (y * Settings.CHUNK_SIZE) + x;
 	}
 	
 }

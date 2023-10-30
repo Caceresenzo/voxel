@@ -103,8 +103,6 @@ public class Main {
 		glfwWindowHint(GLFW_DEPTH_BITS, 24);
 		
 		// Create the window
-		System.out.println(Settings.ASPECT_RATIO);
-		
 		window = glfwCreateWindow(Settings.WINDOW_RESOLUTION.x, Settings.WINDOW_RESOLUTION.y, "Hello World!", NULL, NULL);
 		if (window == NULL)
 			throw new RuntimeException("Failed to create the GLFW window");
