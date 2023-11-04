@@ -66,21 +66,37 @@ public class Camera {
 	}
 	
 	public void moveUp(float velocity) {
-//		position.add(up.mul(velocity, new Vector3f()));
+		// position.add(up.mul(velocity, new Vector3f()));
 		position.add(Settings.WORLD_UP.mul(velocity, new Vector3f()));
 	}
 	
 	public void moveDown(float velocity) {
-//		position.sub(up.mul(velocity, new Vector3f()));
+		// position.sub(up.mul(velocity, new Vector3f()));
 		position.sub(Settings.WORLD_UP.mul(velocity, new Vector3f()));
 	}
 	
 	public void moveForward(float velocity) {
-		position.add(forward.mul(velocity, new Vector3f()));
+		// position.add(forward.mul(velocity, new Vector3f()));
+		
+		final var front = new Vector3f(
+			(float) (Math.cos(yaw) * Math.cos(pitch)),
+			(float) 0,
+			(float) (Math.sin(yaw) * Math.cos(pitch))
+		).normalize(this.forward.length()).mul(velocity);
+		
+		position.add(front);
 	}
 	
 	public void moveBackward(float velocity) {
-		position.sub(forward.mul(velocity, new Vector3f()));
+		// position.sub(forward.mul(velocity, new Vector3f()));
+		
+		final var front = new Vector3f(
+			(float) (Math.cos(yaw) * Math.cos(pitch)),
+			(float) 0,
+			(float) (Math.sin(yaw) * Math.cos(pitch))
+		).normalize(this.forward.length()).mul(velocity);
+		
+		position.sub(front);
 	}
 	
 }
