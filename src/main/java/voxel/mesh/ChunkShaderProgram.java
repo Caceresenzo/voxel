@@ -4,8 +4,7 @@ import engine.shader.Matrix4fUniform;
 import engine.shader.Sampler2dUniform;
 import engine.shader.Shader;
 import engine.shader.ShaderProgram;
-import engine.shader.UnsignedByteAttribute;
-import engine.shader.Vector3ubAttribute;
+import engine.shader.UnsignedIntegerAttribute;
 
 public class ChunkShaderProgram extends ShaderProgram {
 	
@@ -13,11 +12,7 @@ public class ChunkShaderProgram extends ShaderProgram {
 	public final Matrix4fUniform model;
 	public final Matrix4fUniform view;
 	public final Sampler2dUniform texture;
-	public final Vector3ubAttribute position;
-	public final UnsignedByteAttribute voxelId;
-	public final UnsignedByteAttribute faceId;
-	public final UnsignedByteAttribute ambiantOcclusionId;
-	public final UnsignedByteAttribute flipId;
+	public final UnsignedIntegerAttribute packedData;
 	
 	public ChunkShaderProgram(Shader vertexShader, Shader fragmentShader) {
 		super(vertexShader, fragmentShader);
@@ -26,11 +21,7 @@ public class ChunkShaderProgram extends ShaderProgram {
 		this.model = createMatrix4fUniform("m_model");
 		this.view = createMatrix4fUniform("m_view");
 		this.texture = createSampler2dUniform("texture");
-		this.position = createVector3ubAttribute("in_position");
-		this.voxelId = createUnsignedByteAttribute("voxel_id");
-		this.faceId = createUnsignedByteAttribute("face_id");
-		this.ambiantOcclusionId = createUnsignedByteAttribute("ao_id");
-		this.flipId = createUnsignedByteAttribute("flip_id");
+		this.packedData = createUnsignedIntegerAttribute("packed_data");
 	}
 	
 }

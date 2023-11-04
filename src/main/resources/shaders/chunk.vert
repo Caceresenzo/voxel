@@ -1,10 +1,11 @@
 #version 330 core
 
-layout (location = 0) in ivec3 in_position;
-layout (location = 1) in int voxel_id;
-layout (location = 2) in int face_id;
-layout (location = 3) in int ao_id;
-layout (location = 4) in int flip_id;
+layout (location = 0) in uint packed_data;
+int x, y, z;
+int voxel_id;
+int face_id;
+int ao_id;
+int flip_id;
 
 uniform mat4 m_projection;
 uniform mat4 m_view;
@@ -43,8 +44,36 @@ vec3 hash31(float p)
 	return fract((p3.xxy + p3.yzz) * p3.zyx) + 0.05;
 }
 
+const uint ao_id_shift = 1u;
+const uint face_id_shift = ao_id_shift + 2u;
+const uint voxel_id_shift = face_id_shift + 3u;
+const uint z_shift = voxel_id_shift + 8u;
+const uint y_shift = z_shift + 6u;
+const uint x_shift = y_shift + 6u;
+
+const uint xyz_mask = 63u;
+const uint voxel_id_mask = 255u;
+const uint face_id_mask = 7u;
+const uint ao_id_mask = 3u;
+const uint flip_id_mask = 1u;
+
+void unpack(uint packed_data)
+{
+    x = int(packed_data >> x_shift);
+    y = int((packed_data >> y_shift) & xyz_mask);
+    z = int((packed_data >> z_shift) & xyz_mask);
+
+    voxel_id = int((packed_data >> voxel_id_shift) & voxel_id_mask);
+    face_id = int((packed_data >> face_id_shift) & face_id_mask);
+    ao_id = int((packed_data >> ao_id_shift) & ao_id_mask);
+    flip_id = int(packed_data & flip_id_mask);
+}
+
 void main()
 {
+    unpack(packed_data);
+    
+    vec3 in_position = vec3(x, y, z);
 	int uv_index = gl_VertexID % 6 + ((face_id & 1) + flip_id * 2) * 6;
 	uv = uv_coords[uv_indices[uv_index]];
 	
