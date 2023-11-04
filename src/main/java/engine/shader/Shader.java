@@ -17,7 +17,7 @@ import java.io.InputStream;
 import java.lang.ref.Cleaner.Cleanable;
 import java.util.Objects;
 
-import engine.util.GarbageCollector;
+import engine.util.OpenGL;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +30,7 @@ public class Shader {
 	
 	private Shader(int id) {
 		this.id = id;
-		this.cleanable = GarbageCollector.registerGL(this, () -> glDeleteShader(id));
+		this.cleanable = OpenGL.registerForGarbageCollect(this, () -> glDeleteShader(id));
 	}
 	
 	public void delete() {

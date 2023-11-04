@@ -8,7 +8,6 @@ import java.lang.ref.Cleaner.Cleanable;
 import java.util.ArrayList;
 import java.util.List;
 
-import engine.util.GarbageCollector;
 import engine.util.OpenGL;
 import lombok.Getter;
 
@@ -24,7 +23,7 @@ public class VertexArray {
 		
 		this.buffers = new ArrayList<>();
 		
-		this.cleanable = GarbageCollector.registerGL(this, () -> glDeleteVertexArrays(id));
+		this.cleanable = OpenGL.registerForGarbageCollect(this, () -> glDeleteVertexArrays(id));
 	}
 	
 	public VertexArray bind() {

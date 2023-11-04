@@ -12,7 +12,6 @@ import java.lang.ref.Cleaner.Cleanable;
 import java.util.Arrays;
 import java.util.Collection;
 
-import engine.util.GarbageCollector;
 import engine.util.OpenGL;
 import lombok.Getter;
 
@@ -27,7 +26,7 @@ public class ShaderProgram {
 
 	public ShaderProgram(Collection<Shader> shaders) {
 		this.id = link(shaders);
-		this.cleanable = GarbageCollector.registerGL(this, () -> glDeleteProgram(id));
+		this.cleanable = OpenGL.registerForGarbageCollect(this, () -> glDeleteProgram(id));
 	}
 
 	public void use() {
@@ -63,7 +62,7 @@ public class ShaderProgram {
 	protected FloatAttribute createFloatAttribute(String name, int size, boolean normalized) {
 		return FloatAttribute.ofFloat(this, name, size, normalized);
 	}
-	
+
 	protected IntegerAttribute createIntegerAttribute(String name, int size, boolean unsigned) {
 		return IntegerAttribute.ofInteger(this, name, size, unsigned);
 	}
@@ -72,18 +71,11 @@ public class ShaderProgram {
 		final var id = glCreateProgram();
 		OpenGL.checkErrors();
 
-		shaders.forEach((shader) -> {
-			glAttachShader(id, shader.getId());
-			OpenGL.checkErrors();
-		});
+		shaders.forEach((shader) -> glAttachShader(id, shader.getId()));
 
 		glLinkProgram(id);
-		OpenGL.checkErrors();
 
-		shaders.forEach((shader) -> {
-			glDetachShader(id, shader.getId());
-			OpenGL.checkErrors();
-		});
+		shaders.forEach((shader) -> glDetachShader(id, shader.getId()));
 
 		// final var success = glGetProgrami(id, GL_LINK_STATUS) != 0;
 		final var logs = glGetProgramInfoLog(id);
