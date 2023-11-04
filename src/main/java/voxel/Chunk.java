@@ -1,6 +1,9 @@
 package voxel;
 
+import org.joml.Matrix4f;
 import org.joml.SimplexNoise;
+import org.joml.Vector3f;
+import org.joml.Vector3i;
 
 import lombok.Getter;
 import voxel.mesh.ChunkMesh;
@@ -9,13 +12,24 @@ import voxel.mesh.ChunkShaderProgram;
 public class Chunk {
 	
 	private final ChunkShaderProgram shaderProgram;
-	private final @Getter byte[] voxels;
+	private final @Getter Vector3i position;
+	private @Getter byte[] voxels;
+	private Matrix4f modelMatrix;
 	private ChunkMesh mesh;
+	private boolean isEmpty;
 	
-	public Chunk(ChunkShaderProgram shaderProgram) {
+	public Chunk(ChunkShaderProgram shaderProgram, Vector3i position) {
 		this.shaderProgram = shaderProgram;
-		this.voxels = buildVoxels();
-		this.buildMesh();
+		this.position = position;
+		this.modelMatrix = computeModelMatrix();
+		this.isEmpty = true;
+	}
+	
+	private Matrix4f computeModelMatrix() {
+		final var worldPosition = new Vector3f(position);
+		worldPosition.mul(Settings.CHUNK_SIZE);
+		
+		return new Matrix4f().translate(worldPosition);
 	}
 	
 	public void buildMesh() {
@@ -23,26 +37,50 @@ public class Chunk {
 	}
 	
 	public void render() {
+		if (isEmpty) {
+			return;
+		}
+		
+		shaderProgram.use();
+		shaderProgram.model.load(modelMatrix);
 		mesh.render();
 	}
 	
-	private static byte[] buildVoxels() {
+	public byte[] buildVoxels() {
 		byte[] voxels = new byte[Settings.CHUNK_VOLUME];
 		
+		final var chunkPosition = position.mul(Settings.CHUNK_SIZE, new Vector3i());
+		
 		for (var x = 0; x < Settings.CHUNK_SIZE; ++x) {
-			for (var y = 0; y < Settings.CHUNK_HEIGHT; ++y) {
-				for (var z = 0; z < Settings.CHUNK_SIZE; ++z) {
-					final var index = (z * Settings.CHUNK_SIZE * Settings.CHUNK_HEIGHT) + (y * Settings.CHUNK_SIZE) + x;
+			for (var z = 0; z < Settings.CHUNK_SIZE; ++z) {
+				final var worldX = x + chunkPosition.x;
+				final var worldZ = z + chunkPosition.z;
+				
+				final var worldHeight = (int) (SimplexNoise.noise(worldX * 0.01f, worldZ * 0.01f) * 32 + 32);
+				final var localHeight = Math.min(worldHeight - chunkPosition.y, Settings.CHUNK_SIZE);
+				
+				for (var y = 0; y < localHeight; ++y) {
+					final var worldY = y + chunkPosition.y;
+					final var index = toVoxelIndex(x, y, z);
 					
-					final var value = SimplexNoise.noise(x * 0.05f + 1, y * 0.05f + 1, z * 0.05f + 1);
-					if (value > 0) {
-						voxels[index] = (byte) (((x + y + z) % 255) & 0xff);
-					}
+					voxels[index] = (byte) (worldY + 1);
 				}
 			}
 		}
 		
+		for (final var voxel : voxels) {
+			if (voxel != 0) {
+				isEmpty = false;
+				break;
+			}
+		}
+		
+		this.voxels = voxels;
 		return voxels;
+	}
+	
+	public static int toVoxelIndex(int x, int y, int z) {
+		return (z * Settings.CHUNK_SIZE * Settings.CHUNK_HEIGHT) + (y * Settings.CHUNK_SIZE) + x;
 	}
 	
 }

@@ -244,7 +244,7 @@ public class ChunkMesh {
 	private boolean isInChunkHeight(int value) {
 		return 0 <= value && value < Settings.CHUNK_HEIGHT;
 	}
-	
+
 	private int toVoxelIndex(int x, int y, int z) {
 		return (z * Settings.CHUNK_SIZE * Settings.CHUNK_HEIGHT) + (y * Settings.CHUNK_SIZE) + x;
 	}

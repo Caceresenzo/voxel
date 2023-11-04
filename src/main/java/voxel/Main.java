@@ -179,7 +179,7 @@ public class Main {
 	
 	Player player;
 	ChunkShaderProgram chunkShaderProgram;
-	Chunk chunk;
+	World world;
 	Texture texture;
 	
 	@SneakyThrows
@@ -192,7 +192,7 @@ public class Main {
 		
 		OpenGL.checkErrors();
 		
-		chunk = new Chunk(chunkShaderProgram);
+		world = new World(chunkShaderProgram);
 		
 		player = new Player();
 		player.update();
@@ -215,7 +215,7 @@ public class Main {
 	public void render() {
 		chunkShaderProgram.use();
 		chunkShaderProgram.view.load(player.getView());
-		chunk.render();
+		world.render();
 		OpenGL.checkErrors();
 	}
 	
