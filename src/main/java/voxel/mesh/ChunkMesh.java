@@ -9,7 +9,6 @@ import engine.vertex.UsageType;
 import engine.vertex.VertexArray;
 import engine.vertex.VertexBuffer;
 import voxel.Chunk;
-import voxel.Face;
 import voxel.Settings;
 import voxel.World;
 

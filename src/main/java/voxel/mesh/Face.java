@@ -1,4 +1,4 @@
-package voxel;
+package voxel.mesh;
 
 public enum Face {
 	
