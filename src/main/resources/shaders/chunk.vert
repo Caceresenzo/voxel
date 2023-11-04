@@ -10,6 +10,13 @@ uniform mat4 m_model;
 
 out vec3 color;
 out vec2 uv;
+out float shading;
+
+const float face_shading[6] = float[6](
+	1.0, 0.5, /* top bottom */
+	0.5, 0.8, /* right left */
+	0.5, 0.8 /* front back */
+);
 
 const vec2 uv_coords[4] = vec2[4](
 	vec2(0, 0), vec2(0, 1),
@@ -34,6 +41,7 @@ void main()
 	uv = uv_coords[uv_indices[uv_index]];
 	
 	color = hash31(voxel_id);
+	shading = face_shading[face_id];
 	mat4 pvm = m_projection * m_view * m_model;
 	gl_Position = pvm * vec4(in_position, 1.0);
 }
