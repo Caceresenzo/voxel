@@ -31,7 +31,7 @@ public class Uniform extends Variable {
 			final var ignored = stack.mallocInt(1);
 			
 			return IntStream.range(0, count)
-				.mapToObj((index) -> glGetActiveUniform(program.getId(), 0, ignored, ignored))
+				.mapToObj((index) -> glGetActiveUniform(program.getId(), index, ignored, ignored))
 				.toList();
 		}
 	}

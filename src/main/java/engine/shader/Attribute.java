@@ -41,7 +41,7 @@ public class Attribute extends Variable {
 			final var ignored = stack.mallocInt(1);
 			
 			return IntStream.range(0, count)
-				.mapToObj((index) -> glGetActiveAttrib(program.getId(), 0, ignored, ignored))
+				.mapToObj((index) -> glGetActiveAttrib(program.getId(), index, ignored, ignored))
 				.toList();
 		}
 	}
