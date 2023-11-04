@@ -3,6 +3,7 @@
 layout (location = 0) in ivec3 in_position;
 layout (location = 1) in int voxel_id;
 layout (location = 2) in int face_id;
+layout (location = 3) in int ao_id;
 
 uniform mat4 m_projection;
 uniform mat4 m_view;
@@ -11,6 +12,10 @@ uniform mat4 m_model;
 out vec3 color;
 out vec2 uv;
 out float shading;
+
+const float ao_values[4] = float[4](
+	0.1, 0.25, 0.5, 1.0
+);
 
 const float face_shading[6] = float[6](
 	1.0, 0.5, /* top bottom */
@@ -41,7 +46,7 @@ void main()
 	uv = uv_coords[uv_indices[uv_index]];
 	
 	color = hash31(voxel_id);
-	shading = face_shading[face_id];
+	shading = face_shading[face_id] * ao_values[ao_id];
 	mat4 pvm = m_projection * m_view * m_model;
 	gl_Position = pvm * vec4(in_position, 1.0);
 }
