@@ -20,7 +20,7 @@ public class ChunkShaderProgram extends ShaderProgram {
 		this.projection = createMatrix4fUniform("m_projection");
 		this.model = createMatrix4fUniform("m_model");
 		this.view = createMatrix4fUniform("m_view");
-		this.texture = createSampler2dUniform("texture");
+		this.texture = createSampler2dUniform("u_texture");
 		this.packedData = createIntegerAttribute("packed_data", 1, true);
 	}
 	
