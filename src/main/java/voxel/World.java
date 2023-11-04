@@ -23,7 +23,7 @@ public class World {
 			for (var y = 0; y < Settings.WORLD_HEIGHT; ++y) {
 				for (var z = 0; z < Settings.WORLD_DEPTH; ++z) {
 					final var position = new Vector3i(x, y, z);
-					final var chunk = new Chunk(chunkShaderProgram, position);
+					final var chunk = new Chunk(chunkShaderProgram, position, this);
 					
 					final var index = toChunkIndex(x, y, z);
 //					System.out.printf("x=%d y=%d z=%d index=%d %n", x, y, z, index);

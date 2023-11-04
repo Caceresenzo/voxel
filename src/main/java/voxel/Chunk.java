@@ -13,14 +13,16 @@ public class Chunk {
 	
 	private final ChunkShaderProgram shaderProgram;
 	private final @Getter Vector3i position;
+	private final @Getter World world;
 	private @Getter byte[] voxels;
 	private Matrix4f modelMatrix;
 	private ChunkMesh mesh;
 	private boolean isEmpty;
 	
-	public Chunk(ChunkShaderProgram shaderProgram, Vector3i position) {
+	public Chunk(ChunkShaderProgram shaderProgram, Vector3i position, World world) {
 		this.shaderProgram = shaderProgram;
 		this.position = position;
+		this.world = world;
 		this.modelMatrix = computeModelMatrix();
 		this.isEmpty = true;
 	}

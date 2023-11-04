@@ -13,6 +13,7 @@ import engine.vertex.VertexBuffer;
 import voxel.Chunk;
 import voxel.Face;
 import voxel.Settings;
+import voxel.World;
 
 public class ChunkMesh {
 	
@@ -60,11 +61,40 @@ public class ChunkMesh {
 		OpenGL.checkErrors();
 	}
 	
-	private boolean isVoid(int x, int y, int z, byte[] chunkVoxels) {
-		if (isInChunk(x) && isInChunkHeight(y) && isInChunk(z)) {
-			if (chunkVoxels[toVoxelIndex(x, y, z)] != 0) {
-				return false;
-			}
+	private int getChunkIndex(int worldX, int worldY, int worldZ) {
+		final var chunkX = worldX / Settings.CHUNK_SIZE;
+		final var chunkY = worldY / Settings.CHUNK_SIZE;
+		final var chunkZ = worldZ / Settings.CHUNK_SIZE;
+		
+		if (!((0 <= chunkX && chunkX < Settings.WORLD_WIDTH)
+			&& (0 <= chunkY && chunkY < Settings.WORLD_HEIGHT)
+			&& (0 <= chunkZ && chunkZ < Settings.WORLD_DEPTH))) {
+			return -1;
+		}
+		
+		return World.toChunkIndex(chunkX, chunkY, chunkZ);
+	}
+	
+	public static void main(String[] args) {
+		System.out.println(positiveMod(-1, 16));
+	}
+	
+	private boolean isVoid(int x, int y, int z, int worldX, int worldY, int worldZ, byte[][] worldVoxels) {
+		final var chunkIndex = getChunkIndex(worldX, worldY, worldZ);
+		if (chunkIndex == -1) {
+			return false;
+		}
+		
+		final var chunkVoxels = worldVoxels[chunkIndex];
+		
+		final var index = toVoxelIndex(
+			positiveMod(x, Settings.CHUNK_SIZE),
+			positiveMod(y, Settings.CHUNK_SIZE),
+			positiveMod(z, Settings.CHUNK_SIZE)
+		);
+		
+		if (chunkVoxels[index] != 0) {
+			return false;
 		}
 		
 		return true;
@@ -84,6 +114,11 @@ public class ChunkMesh {
 		
 		final var orderedVectors = new Vector3i[6];
 		
+		final var chunkX = chunk.getPosition().x;
+		final var chunkY = chunk.getPosition().y;
+		final var chunkZ = chunk.getPosition().z;
+		final var worldVoxels = chunk.getWorld().getVoxels();
+		
 		for (var x = 0; x < Settings.CHUNK_SIZE; ++x) {
 			for (var y = 0; y < Settings.CHUNK_HEIGHT; ++y) {
 				for (var z = 0; z < Settings.CHUNK_SIZE; ++z) {
@@ -94,8 +129,12 @@ public class ChunkMesh {
 						continue;
 					}
 					
+					final var worldX = x + chunkX * Settings.CHUNK_SIZE;
+					final var worldY = y + chunkY * Settings.CHUNK_SIZE;
+					final var worldZ = z + chunkZ * Settings.CHUNK_SIZE;
+					
 					/* top face */
-					if (isVoid(x, y + 1, z, voxels)) {
+					if (isVoid(x, y + 1, z, worldX, worldY + 1, worldZ, worldVoxels)) {
 						// @formatter:off
 						vectors[0].set(x    , y + 1, z    );
 						vectors[1].set(x + 1, y + 1, z    );
@@ -115,7 +154,7 @@ public class ChunkMesh {
 					}
 					
 					/* bottom face */
-					if (isVoid(x, y - 1, z, voxels)) {
+					if (isVoid(x, y - 1, z, worldX, worldY - 1, worldZ, worldVoxels)) {
 						// @formatter:off
 						vectors[0].set(x    , y    , z    );
 						vectors[1].set(x + 1, y    , z    );
@@ -135,7 +174,7 @@ public class ChunkMesh {
 					}
 					
 					/* right face */
-					if (isVoid(x + 1, y, z, voxels)) {
+					if (isVoid(x + 1, y, z, worldX + 1, worldY, worldZ, worldVoxels)) {
 						// @formatter:off
 						vectors[0].set(x + 1, y    , z    );
 						vectors[1].set(x + 1, y + 1, z    );
@@ -155,7 +194,7 @@ public class ChunkMesh {
 					}
 					
 					/* left face */
-					if (isVoid(x - 1, y, z, voxels)) {
+					if (isVoid(x - 1, y, z, worldX - 1, worldY, worldZ, worldVoxels)) {
 						// @formatter:off
 						vectors[0].set(x    , y    , z    );
 						vectors[1].set(x    , y + 1, z    );
@@ -175,7 +214,7 @@ public class ChunkMesh {
 					}
 					
 					/* back face */
-					if (isVoid(x, y, z - 1, voxels)) {
+					if (isVoid(x, y, z - 1, worldX, worldY, worldZ - 1, worldVoxels)) {
 						// @formatter:off
 						vectors[0].set(x    , y    , z    );
 						vectors[1].set(x    , y + 1, z    );
@@ -195,7 +234,7 @@ public class ChunkMesh {
 					}
 					
 					/* front face */
-					if (isVoid(x, y, z + 1, voxels)) {
+					if (isVoid(x, y, z + 1, worldX, worldY, worldZ + 1, worldVoxels)) {
 						// @formatter:off
 						vectors[0].set(x    , y    , z + 1);
 						vectors[1].set(x    , y + 1, z + 1);
@@ -237,16 +276,12 @@ public class ChunkMesh {
 		return index;
 	}
 	
-	private boolean isInChunk(int value) {
-		return 0 <= value && value < Settings.CHUNK_SIZE;
-	}
-	
-	private boolean isInChunkHeight(int value) {
-		return 0 <= value && value < Settings.CHUNK_HEIGHT;
-	}
-
 	private int toVoxelIndex(int x, int y, int z) {
 		return (z * Settings.CHUNK_SIZE * Settings.CHUNK_HEIGHT) + (y * Settings.CHUNK_SIZE) + x;
+	}
+	
+	public static int positiveMod(int dividend, int divisor) {
+		return (dividend % divisor + divisor) % divisor;
 	}
 	
 }
