@@ -39,7 +39,7 @@ public class ChunkMesh {
 		
 		program.use();
 		
-		final var stride = 6;
+		final var stride = 7;
 		if (triangleCount % stride != 0) {
 			throw new IllegalStateException("invalid stride");
 		}
@@ -48,6 +48,7 @@ public class ChunkMesh {
 		program.voxelId.link(stride, 3);
 		program.faceId.link(stride, 4);
 		program.ambiantOcclusionId.link(stride, 5);
+		program.flipId.link(stride, 6);
 		
 		triangleCount = vertexData.length / stride;
 		
@@ -101,11 +102,24 @@ public class ChunkMesh {
 		int _0,
 		int _1,
 		int _2,
-		int _3
+		int _3,
+		boolean flipId
 	) {
 		
+		public AmbiantOcclusion(int _0, int _1, int _2, int _3) {
+			this(
+				_0, _1, _2, _3,
+				_1 + _3 > _0 + _2
+			);
+		}
+		
 		public AmbiantOcclusion(boolean a, boolean b, boolean c, boolean d, boolean e, boolean f, boolean g, boolean h) {
-			this(add(a, b, c), add(g, h, a), add(e, f, g), add(c, d, e));
+			this(
+				add(a, b, c),
+				add(g, h, a),
+				add(e, f, g),
+				add(c, d, e)
+			);
 		}
 		
 		private static int add(boolean a, boolean b, boolean c) {
@@ -124,10 +138,6 @@ public class ChunkMesh {
 			}
 			
 			return x;
-		}
-		
-		public boolean flipId() {
-			return _1 + _3 > _0 + _2;
 		}
 		
 	}
@@ -188,7 +198,7 @@ public class ChunkMesh {
 	
 	private byte[] getVertexData() {
 		final var voxels = chunk.getVoxels();
-		final var vertices = new byte[Settings.CHUNK_VOLUME * 36 * 5];
+		var vertices = new byte[Settings.CHUNK_VOLUME * 36 * 7];
 		var index = 0;
 		
 		final var vectors = new Vector4i[] {
@@ -230,7 +240,7 @@ public class ChunkMesh {
 						vectors[3].set(x    , y + 1, z + 1, ambiantOcclusion._3);
 						// @formatter:on
 						
-						if (ambiantOcclusion.flipId()) {
+						if (ambiantOcclusion.flipId) {
 							orderedVectors[0] = vectors[1];
 							orderedVectors[1] = vectors[0];
 							orderedVectors[2] = vectors[3];
@@ -246,7 +256,7 @@ public class ChunkMesh {
 							orderedVectors[5] = vectors[1];
 						}
 						
-						index = addData(vertices, index, voxelId, Face.TOP, orderedVectors);
+						index = addData(vertices, index, voxelId, ambiantOcclusion.flipId, Face.TOP, orderedVectors);
 						// System.out.println("top index=%d".formatted(index));
 					}
 					
@@ -261,7 +271,7 @@ public class ChunkMesh {
 						vectors[3].set(x    , y    , z + 1, ambiantOcclusion._3);
 						// @formatter:on
 						
-						if (ambiantOcclusion.flipId()) {
+						if (ambiantOcclusion.flipId) {
 							orderedVectors[0] = vectors[1];
 							orderedVectors[1] = vectors[3];
 							orderedVectors[2] = vectors[0];
@@ -277,7 +287,7 @@ public class ChunkMesh {
 							orderedVectors[5] = vectors[2];
 						}
 						
-						index = addData(vertices, index, voxelId, Face.BOTTOM, orderedVectors);
+						index = addData(vertices, index, voxelId, ambiantOcclusion.flipId, Face.BOTTOM, orderedVectors);
 						// System.out.println("bottom index=%d".formatted(index));
 					}
 					
@@ -292,7 +302,7 @@ public class ChunkMesh {
 						vectors[3].set(x + 1, y    , z + 1, ambiantOcclusion._3);
 						// @formatter:on
 						
-						if (ambiantOcclusion.flipId()) {
+						if (ambiantOcclusion.flipId) {
 							orderedVectors[0] = vectors[3];
 							orderedVectors[1] = vectors[0];
 							orderedVectors[2] = vectors[1];
@@ -308,7 +318,7 @@ public class ChunkMesh {
 							orderedVectors[5] = vectors[3];
 						}
 						
-						index = addData(vertices, index, voxelId, Face.RIGHT, orderedVectors);
+						index = addData(vertices, index, voxelId, ambiantOcclusion.flipId, Face.RIGHT, orderedVectors);
 						// System.out.println("right index=%d".formatted(index));
 					}
 					
@@ -323,7 +333,7 @@ public class ChunkMesh {
 						vectors[3].set(x    , y    , z + 1, ambiantOcclusion._3);
 						// @formatter:on
 						
-						if (ambiantOcclusion.flipId()) {
+						if (ambiantOcclusion.flipId) {
 							orderedVectors[0] = vectors[3];
 							orderedVectors[1] = vectors[1];
 							orderedVectors[2] = vectors[0];
@@ -339,7 +349,7 @@ public class ChunkMesh {
 							orderedVectors[5] = vectors[2];
 						}
 						
-						index = addData(vertices, index, voxelId, Face.LEFT, orderedVectors);
+						index = addData(vertices, index, voxelId, ambiantOcclusion.flipId, Face.LEFT, orderedVectors);
 						// System.out.println("left index=%d".formatted(index));
 					}
 					
@@ -354,7 +364,7 @@ public class ChunkMesh {
 						vectors[3].set(x + 1, y    , z    , ambiantOcclusion._3);
 						// @formatter:on
 						
-						if (ambiantOcclusion.flipId()) {
+						if (ambiantOcclusion.flipId) {
 							orderedVectors[0] = vectors[3];
 							orderedVectors[1] = vectors[0];
 							orderedVectors[2] = vectors[1];
@@ -370,7 +380,7 @@ public class ChunkMesh {
 							orderedVectors[5] = vectors[3];
 						}
 						
-						index = addData(vertices, index, voxelId, Face.BACK, orderedVectors);
+						index = addData(vertices, index, voxelId, ambiantOcclusion.flipId, Face.BACK, orderedVectors);
 						// System.out.println("back index=%d".formatted(index));
 					}
 					
@@ -385,7 +395,7 @@ public class ChunkMesh {
 						vectors[3].set(x + 1, y    , z + 1, ambiantOcclusion._3);
 						// @formatter:on
 						
-						if (ambiantOcclusion.flipId()) {
+						if (ambiantOcclusion.flipId) {
 							orderedVectors[0] = vectors[3];
 							orderedVectors[1] = vectors[1];
 							orderedVectors[2] = vectors[0];
@@ -401,7 +411,7 @@ public class ChunkMesh {
 							orderedVectors[5] = vectors[2];
 						}
 						
-						index = addData(vertices, index, voxelId, Face.FRONT, orderedVectors);
+						index = addData(vertices, index, voxelId, ambiantOcclusion.flipId, Face.FRONT, orderedVectors);
 						// System.out.println("front index=%d".formatted(index));
 					}
 				}
@@ -411,10 +421,13 @@ public class ChunkMesh {
 		final var trimmed = new byte[index];
 		System.arraycopy(vertices, 0, trimmed, 0, trimmed.length);
 		
+		vertices = null;
+		System.gc();
+		
 		return trimmed;
 	}
 	
-	private int addData(byte[] vertices, int index, byte voxelId, Face face, Vector4i[] vectors) {
+	private int addData(byte[] vertices, int index, byte voxelId, boolean flipId, Face face, Vector4i[] vectors) {
 		final var faceId = face.ordinal();
 		
 		for (final var vector : vectors) {
@@ -424,6 +437,7 @@ public class ChunkMesh {
 			vertices[index++] = voxelId;
 			vertices[index++] = (byte) faceId;
 			vertices[index++] = (byte) vector.w;
+			vertices[index++] = (byte) (flipId ? 1 : 0);
 		}
 		
 		return index;

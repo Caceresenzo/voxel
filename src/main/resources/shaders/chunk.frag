@@ -17,7 +17,7 @@ void main()
 	texture_color = pow(texture_color, gamma);
 	
 	texture_color.rgb *= color;
-	texture_color = texture_color * 0.0001 + vec3(1);
+//	texture_color = texture_color * 0.0001 + vec3(1);
 	texture_color *= shading;
 	
 	texture_color = pow(texture_color, inv_gamma);

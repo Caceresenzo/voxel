@@ -17,6 +17,7 @@ public class ChunkShaderProgram extends ShaderProgram {
 	public final UnsignedByteAttribute voxelId;
 	public final UnsignedByteAttribute faceId;
 	public final UnsignedByteAttribute ambiantOcclusionId;
+	public final UnsignedByteAttribute flipId;
 	
 	public ChunkShaderProgram(Shader vertexShader, Shader fragmentShader) {
 		super(vertexShader, fragmentShader);
@@ -29,6 +30,7 @@ public class ChunkShaderProgram extends ShaderProgram {
 		this.voxelId = createUnsignedByteAttribute("voxel_id");
 		this.faceId = createUnsignedByteAttribute("face_id");
 		this.ambiantOcclusionId = createUnsignedByteAttribute("ao_id");
+		this.flipId = createUnsignedByteAttribute("flip_id");
 	}
 	
 }

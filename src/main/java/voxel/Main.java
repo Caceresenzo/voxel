@@ -202,7 +202,7 @@ public class Main {
 		chunkShaderProgram.model.load(new Matrix4f());
 		
 		texture = Texture.load(
-			getClass().getResourceAsStream("/textures/frame.png")
+			getClass().getResourceAsStream("/textures/arrow.png")
 		);
 		
 		texture.activate(0);
