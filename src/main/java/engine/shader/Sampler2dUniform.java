@@ -6,7 +6,7 @@ import engine.texture.Texture;
 
 public class Sampler2dUniform extends Uniform {
 	
-	public Sampler2dUniform(ShaderProgram program, String name) {
+	protected Sampler2dUniform(ShaderProgram program, String name) {
 		super(program, name);
 	}
 	

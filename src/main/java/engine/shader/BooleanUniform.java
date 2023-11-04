@@ -4,7 +4,7 @@ import static org.lwjgl.opengl.GL20.glUniform1i;
 
 public class BooleanUniform extends Uniform {
 	
-	public BooleanUniform(ShaderProgram program, String name) {
+	protected BooleanUniform(ShaderProgram program, String name) {
 		super(program, name);
 	}
 	

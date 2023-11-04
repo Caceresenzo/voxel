@@ -6,7 +6,6 @@ import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
 import static org.lwjgl.opengl.GL20.glGetActiveAttrib;
 import static org.lwjgl.opengl.GL20.glGetAttribLocation;
 import static org.lwjgl.opengl.GL20.glGetProgrami;
-import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 import static org.lwjgl.system.MemoryStack.stackPush;
 
 import java.util.List;
@@ -14,18 +13,16 @@ import java.util.stream.IntStream;
 
 import engine.util.OpenGL;
 
-public class Attribute extends Variable {
+public abstract class Attribute extends Variable {
 	
 	protected final int size;
 	protected final int dataType;
-	protected final boolean normalized;
 	
-	protected Attribute(ShaderProgram program, String name, int size, int dataType, boolean normalized) {
+	protected Attribute(ShaderProgram program, String name, int size, int dataType) {
 		super(program, name);
 		
 		this.size = size;
 		this.dataType = dataType;
-		this.normalized = normalized;
 	}
 	
 	@Override
@@ -62,9 +59,7 @@ public class Attribute extends Variable {
 		OpenGL.checkErrors();
 	}
 	
-	protected void doLink(int stride, int offset) {
-		glVertexAttribPointer(location, size, dataType, normalized, stride, offset);
-	}
+	protected abstract void doLink(int stride, int offset);
 	
 	public void disable() {
 		glDisableVertexAttribArray(location);

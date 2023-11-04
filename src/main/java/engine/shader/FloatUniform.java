@@ -4,7 +4,7 @@ import static org.lwjgl.opengl.GL20.glUniform1f;
 
 public class FloatUniform extends Uniform {
 	
-	public FloatUniform(ShaderProgram program, String name) {
+	protected FloatUniform(ShaderProgram program, String name) {
 		super(program, name);
 	}
 	

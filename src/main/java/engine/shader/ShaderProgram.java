@@ -60,20 +60,12 @@ public class ShaderProgram {
 		return new Sampler2dUniform(this, name);
 	}
 
-	protected UnsignedByteAttribute createUnsignedByteAttribute(String name) {
-		return new UnsignedByteAttribute(this, name);
+	protected FloatAttribute createFloatAttribute(String name, int size, boolean normalized) {
+		return FloatAttribute.ofFloat(this, name, size, normalized);
 	}
-
-	protected Vector3fAttribute createVector3fAttribute(String name) {
-		return new Vector3fAttribute(this, name, false);
-	}
-
-	protected Vector3ubAttribute createVector3ubAttribute(String name) {
-		return new Vector3ubAttribute(this, name);
-	}
-
-	protected UnsignedIntegerAttribute createUnsignedIntegerAttribute(String name) {
-		return new UnsignedIntegerAttribute(this, name);
+	
+	protected IntegerAttribute createIntegerAttribute(String name, int size, boolean unsigned) {
+		return IntegerAttribute.ofInteger(this, name, size, unsigned);
 	}
 
 	private static int link(Collection<Shader> shaders) {
