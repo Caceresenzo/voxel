@@ -14,7 +14,6 @@ import java.util.stream.IntStream;
 import engine.shader.DataType;
 import engine.shader.ShaderProgram;
 import engine.shader.variable.Variable;
-import engine.util.OpenGL;
 import lombok.Getter;
 
 public abstract class Attribute extends Variable {
@@ -49,7 +48,6 @@ public abstract class Attribute extends Variable {
 
 	public void enable() {
 		glEnableVertexAttribArray(location);
-		OpenGL.checkErrors();
 	}
 
 	public void link(int stride, int offset) {
@@ -59,15 +57,12 @@ public abstract class Attribute extends Variable {
 
 		enable();
 		doLink(stride, offset);
-
-		OpenGL.checkErrors();
 	}
 
 	protected abstract void doLink(int stride, int offset);
 
 	public void disable() {
 		glDisableVertexAttribArray(location);
-		OpenGL.checkErrors();
 	}
 
 }

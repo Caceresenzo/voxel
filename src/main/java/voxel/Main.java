@@ -49,6 +49,7 @@ import static org.lwjgl.opengl.GL11.glEnable;
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
+import java.io.IOException;
 import java.nio.IntBuffer;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -84,8 +85,8 @@ public class Main {
 		// Terminate GLFW and free the error callback
 		glfwTerminate();
 		glfwSetErrorCallback(null).free();
-		
-		System.out.println("goodbye");
+
+		System.out.println("Goodbye");
 	}
 
 	private void init() {
@@ -165,6 +166,9 @@ public class Main {
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		// glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		initialize();
+		System.gc();
+		System.gc();
+		System.gc();
 
 		// Run the rendering loop until the user has attempted to close
 		// the window or has pressed the ESCAPE key.
@@ -185,6 +189,8 @@ public class Main {
 			// Poll for window events. The key callback above will only be
 			// invoked during this call.
 			glfwPollEvents();
+
+			OpenGL.checkErrors();
 		}
 	}
 
@@ -199,8 +205,6 @@ public class Main {
 			Shader.load(Shader.Type.VERTEX, getClass().getResourceAsStream("/shaders/chunk.vert")),
 			Shader.load(Shader.Type.FRAGMENT, getClass().getResourceAsStream("/shaders/chunk.frag"))
 		);
-
-		OpenGL.checkErrors();
 
 		world = new World(chunkShaderProgram);
 
@@ -228,7 +232,8 @@ public class Main {
 		OpenGL.checkErrors();
 	}
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
+//		System.in.read();
 		new Main().run();
 	}
 

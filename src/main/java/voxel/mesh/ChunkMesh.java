@@ -3,7 +3,6 @@ package voxel.mesh;
 import static org.lwjgl.opengl.GL11.GL_TRIANGLES;
 import static org.lwjgl.opengl.GL11.glDrawArrays;
 
-import engine.util.OpenGL;
 import engine.vertex.BufferType;
 import engine.vertex.UsageType;
 import engine.vertex.VertexArray;
@@ -23,10 +22,10 @@ public class ChunkMesh {
 		this.chunk = chunk;
 		this.program = shaderProgram;
 
-		this.vertexArray = createVertexArray();
+		createVertexArray();
 	}
 
-	private VertexArray createVertexArray() {
+	private void createVertexArray() {
 		final var vertexData = getVertexData();
 
 		final var buffer = new VertexBuffer(BufferType.ARRAY, UsageType.STATIC_DRAW);
@@ -36,9 +35,8 @@ public class ChunkMesh {
 
 		program.linkAttributes(array);
 		
-		triangleCount = vertexData.length;
-
-		return array;
+		this.triangleCount = vertexData.length;
+		this.vertexArray = array;
 	}
 
 	public void render() {
@@ -46,7 +44,6 @@ public class ChunkMesh {
 		vertexArray.bind();
 
 		glDrawArrays(GL_TRIANGLES, 0, triangleCount);
-		OpenGL.checkErrors();
 	}
 
 	private int getChunkIndex(int worldX, int worldY, int worldZ) {
@@ -154,10 +151,12 @@ public class ChunkMesh {
 			| (ambiantOcclusionId << ambiantOcclusionId_shift)
 			| (flipId));
 	}
+	
+//	static int[] vertices = new int[Settings.CHUNK_VOLUME * 36];
 
 	private int[] getVertexData() {
-		final var voxels = chunk.getVoxels();
 		var vertices = new int[Settings.CHUNK_VOLUME * 36];
+		final var voxels = chunk.getVoxels();
 		var index = 0;
 
 		final var chunkX = chunk.getPosition().x;
@@ -365,8 +364,8 @@ public class ChunkMesh {
 		final var trimmed = new int[index];
 		System.arraycopy(vertices, 0, trimmed, 0, trimmed.length);
 
-		vertices = null;
-		System.gc();
+//		vertices = null;
+//		System.gc();
 
 		return trimmed;
 	}

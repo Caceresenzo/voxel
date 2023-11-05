@@ -13,7 +13,7 @@ public class Settings {
 	public static final int CHUNK_AREA = CHUNK_SIZE * CHUNK_SIZE;
 	public static final int CHUNK_VOLUME = CHUNK_AREA * CHUNK_HEIGHT;
 	
-	public static final int WORLD_WIDTH = 8;
+	public static final int WORLD_WIDTH = 10;
 	public static final int WORLD_HEIGHT = 3;
 	public static final int WORLD_DEPTH = WORLD_WIDTH;
 	public static final int WORLD_AREA = WORLD_WIDTH * WORLD_DEPTH;

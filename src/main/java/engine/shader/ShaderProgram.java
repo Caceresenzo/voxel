@@ -43,12 +43,10 @@ public class ShaderProgram {
 
 	public void use() {
 		glUseProgram(id);
-		OpenGL.checkErrors();
 	}
 
 	public void unuse() {
 		glUseProgram(0);
-		OpenGL.checkErrors();
 	}
 
 	public void delete() {
@@ -113,7 +111,6 @@ public class ShaderProgram {
 
 	private static int link(Collection<Shader> shaders) {
 		final var id = glCreateProgram();
-		OpenGL.checkErrors();
 
 		shaders.forEach((shader) -> glAttachShader(id, shader.getId()));
 

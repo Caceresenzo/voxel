@@ -28,13 +28,11 @@ public class VertexArray {
 
 	public VertexArray bind() {
 		glBindVertexArray(id);
-		OpenGL.checkErrors();
 		return this;
 	}
 
 	public VertexArray unbind() {
 		glBindVertexArray(0);
-		OpenGL.checkErrors();
 		return this;
 	}
 
