@@ -45,8 +45,12 @@ public class VertexArray {
 		return this;
 	}
 
-	public void delete() {
+	public void delete(boolean includeBuffers) {
 		cleanable.clean();
+		
+		if (includeBuffers) {
+			buffers.forEach(VertexBuffer::delete);
+		}
 	}
 
 	private record DeleteAction(int arrayId) implements Runnable {

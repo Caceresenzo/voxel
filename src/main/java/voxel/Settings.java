@@ -36,5 +36,7 @@ public class Settings {
 	public static final float MOUSE_SENSITIVITY = 0.002f;
 	
 	public static final Vector3f WORLD_UP = new Vector3f(0, 1, 0);
+
+	public static final int MAX_RAY_DIST = 6;
 	
 }

@@ -50,6 +50,10 @@ public class World {
 		}
 	}
 	
+	public static int toChunkIndex(Vector3i position) {
+		return (position.z * Settings.WORLD_DEPTH * Settings.WORLD_HEIGHT) + (position.y * Settings.WORLD_WIDTH) + position.x;
+	}
+	
 	public static int toChunkIndex(int x, int y, int z) {
 		return (z * Settings.WORLD_DEPTH * Settings.WORLD_HEIGHT) + (y * Settings.WORLD_WIDTH) + x;
 	}

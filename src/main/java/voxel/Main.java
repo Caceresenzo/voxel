@@ -8,9 +8,12 @@ import static org.lwjgl.glfw.GLFW.GLFW_CURSOR_DISABLED;
 import static org.lwjgl.glfw.GLFW.GLFW_DEPTH_BITS;
 import static org.lwjgl.glfw.GLFW.GLFW_FALSE;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE;
+import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_LEFT;
+import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_RIGHT;
 import static org.lwjgl.glfw.GLFW.GLFW_OPENGL_CORE_PROFILE;
 import static org.lwjgl.glfw.GLFW.GLFW_OPENGL_FORWARD_COMPAT;
 import static org.lwjgl.glfw.GLFW.GLFW_OPENGL_PROFILE;
+import static org.lwjgl.glfw.GLFW.GLFW_PRESS;
 import static org.lwjgl.glfw.GLFW.GLFW_RELEASE;
 import static org.lwjgl.glfw.GLFW.GLFW_RESIZABLE;
 import static org.lwjgl.glfw.GLFW.GLFW_TRUE;
@@ -28,6 +31,7 @@ import static org.lwjgl.glfw.GLFW.glfwPollEvents;
 import static org.lwjgl.glfw.GLFW.glfwSetErrorCallback;
 import static org.lwjgl.glfw.GLFW.glfwSetInputMode;
 import static org.lwjgl.glfw.GLFW.glfwSetKeyCallback;
+import static org.lwjgl.glfw.GLFW.glfwSetMouseButtonCallback;
 import static org.lwjgl.glfw.GLFW.glfwSetWindowPos;
 import static org.lwjgl.glfw.GLFW.glfwSetWindowShouldClose;
 import static org.lwjgl.glfw.GLFW.glfwSetWindowTitle;
@@ -121,6 +125,18 @@ public class Main {
 		glfwSetKeyCallback(window, (window, key, scancode, action, mods) -> {
 			if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE)
 				glfwSetWindowShouldClose(window, true); // We will detect this in the rendering loop
+		});
+		
+		glfwSetMouseButtonCallback(window, (window, button, action, mods) -> {
+			if (action == GLFW_PRESS) {
+				if (button == GLFW_MOUSE_BUTTON_LEFT) {
+					voxelHandler.place();
+				}
+
+				if (button == GLFW_MOUSE_BUTTON_RIGHT) {
+					voxelHandler.destroy();
+				}
+			}
 		});
 
 		// Get the thread stack and push a new frame
@@ -216,6 +232,7 @@ public class Main {
 	ChunkShaderProgram chunkShaderProgram;
 	World world;
 	Texture texture;
+	VoxelHandler voxelHandler;
 
 	@SneakyThrows
 	public void initialize() {
@@ -237,10 +254,13 @@ public class Main {
 		);
 
 		texture.activate(0);
+		
+		voxelHandler = new VoxelHandler(player, world);
 	}
 
 	public void update() {
 		player.update();
+		voxelHandler.update();
 	}
 
 	public void render() {

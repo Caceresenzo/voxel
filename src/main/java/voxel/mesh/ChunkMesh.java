@@ -34,9 +34,17 @@ public class ChunkMesh {
 		final var array = new VertexArray().add(buffer);
 
 		program.linkAttributes(array);
-		
+
+		if (vertexArray != null) {
+			vertexArray.delete(true);
+		}
+
 		this.triangleCount = vertexData.length;
 		this.vertexArray = array;
+	}
+
+	public void rebuild() {
+		createVertexArray();
 	}
 
 	public void render() {
@@ -51,9 +59,9 @@ public class ChunkMesh {
 		final var chunkY = worldY / Settings.CHUNK_SIZE;
 		final var chunkZ = worldZ / Settings.CHUNK_SIZE;
 
-		if (!((0 <= chunkX && chunkX < Settings.WORLD_WIDTH)
-			&& (0 <= chunkY && chunkY < Settings.WORLD_HEIGHT)
-			&& (0 <= chunkZ && chunkZ < Settings.WORLD_DEPTH))) {
+		if (!((0 <= chunkX && chunkX < Settings.WORLD_WIDTH) &&
+				(0 <= chunkY && chunkY < Settings.WORLD_HEIGHT) &&
+				(0 <= chunkZ && chunkZ < Settings.WORLD_DEPTH))) {
 			return -1;
 		}
 
@@ -151,7 +159,7 @@ public class ChunkMesh {
 			| (ambiantOcclusionId << ambiantOcclusionId_shift)
 			| (flipId));
 	}
-	
+
 //	static int[] vertices = new int[Settings.CHUNK_VOLUME * 36];
 
 	private int[] getVertexData() {

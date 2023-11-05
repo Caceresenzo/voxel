@@ -16,7 +16,7 @@ public class Chunk {
 	private final @Getter World world;
 	private @Getter byte[] voxels;
 	private Matrix4f modelMatrix;
-	private ChunkMesh mesh;
+	private @Getter ChunkMesh mesh;
 	private boolean isEmpty;
 	
 	public Chunk(ChunkShaderProgram shaderProgram, Vector3i position, World world) {
@@ -65,20 +65,29 @@ public class Chunk {
 					final var worldY = y + chunkPosition.y;
 					final var index = toVoxelIndex(x, y, z);
 					
-					voxels[index] = (byte) (worldY + 1);
+//					voxels[index] = (byte) (worldY + 1);
+					voxels[index] = (byte) (position.x + position.y + position.z);
 				}
 			}
 		}
 		
+		this.voxels = voxels;
+		testIfEmpty();
+		
+		return voxels;
+	}
+	
+	public void testIfEmpty() {
 		for (final var voxel : voxels) {
 			if (voxel != 0) {
 				isEmpty = false;
 				break;
 			}
 		}
-		
-		this.voxels = voxels;
-		return voxels;
+	}
+	
+	public static int toVoxelIndex(Vector3i position) {
+		return (position.z * Settings.CHUNK_SIZE * Settings.CHUNK_HEIGHT) + (position.y * Settings.CHUNK_SIZE) + position.x;
 	}
 	
 	public static int toVoxelIndex(int x, int y, int z) {
