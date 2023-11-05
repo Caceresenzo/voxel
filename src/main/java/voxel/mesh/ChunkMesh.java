@@ -34,9 +34,8 @@ public class ChunkMesh {
 
 		final var array = new VertexArray().add(buffer);
 
-		program.use();
-		program.packedData.link(4, 0);
-
+		program.linkAttributes(array);
+		
 		triangleCount = vertexData.length;
 
 		return array;

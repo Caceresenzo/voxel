@@ -1,10 +1,12 @@
-package engine.shader;
+package engine.shader.variable.uniform;
 
 import static org.lwjgl.opengl.GL20.glUniform1i;
 
+import engine.shader.ShaderProgram;
+
 public class BooleanUniform extends Uniform {
 	
-	protected BooleanUniform(ShaderProgram program, String name) {
+	public BooleanUniform(ShaderProgram program, String name) {
 		super(program, name);
 	}
 	

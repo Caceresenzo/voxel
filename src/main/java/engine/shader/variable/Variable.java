@@ -1,7 +1,8 @@
-package engine.shader;
+package engine.shader.variable;
 
 import java.util.List;
 
+import engine.shader.ShaderProgram;
 import lombok.Getter;
 
 @Getter

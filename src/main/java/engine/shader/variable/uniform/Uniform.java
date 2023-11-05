@@ -1,4 +1,4 @@
-package engine.shader;
+package engine.shader.variable.uniform;
 
 import static org.lwjgl.opengl.GL20.GL_ACTIVE_UNIFORMS;
 import static org.lwjgl.opengl.GL20.glGetActiveUniform;
@@ -9,6 +9,8 @@ import static org.lwjgl.system.MemoryStack.stackPush;
 import java.util.List;
 import java.util.stream.IntStream;
 
+import engine.shader.ShaderProgram;
+import engine.shader.variable.Variable;
 import lombok.Getter;
 
 @Getter

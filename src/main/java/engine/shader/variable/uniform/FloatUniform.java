@@ -1,10 +1,12 @@
-package engine.shader;
+package engine.shader.variable.uniform;
 
 import static org.lwjgl.opengl.GL20.glUniform1f;
 
+import engine.shader.ShaderProgram;
+
 public class FloatUniform extends Uniform {
 	
-	protected FloatUniform(ShaderProgram program, String name) {
+	public FloatUniform(ShaderProgram program, String name) {
 		super(program, name);
 	}
 	

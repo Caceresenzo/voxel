@@ -9,16 +9,27 @@ import static org.lwjgl.opengl.GL20.glLinkProgram;
 import static org.lwjgl.opengl.GL20.glUseProgram;
 
 import java.lang.ref.Cleaner.Cleanable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
+import engine.shader.variable.attribute.Attribute;
+import engine.shader.variable.attribute.FloatAttribute;
+import engine.shader.variable.attribute.IntegerAttribute;
+import engine.shader.variable.uniform.BooleanUniform;
+import engine.shader.variable.uniform.FloatUniform;
+import engine.shader.variable.uniform.Matrix4fUniform;
+import engine.shader.variable.uniform.Sampler2dUniform;
 import engine.util.OpenGL;
+import engine.vertex.VertexArray;
 import lombok.Getter;
 
 public class ShaderProgram {
 
 	private final @Getter int id;
 	private final Cleanable cleanable;
+	private final List<Attribute> attributes;
 
 	public ShaderProgram(Shader... shaders) {
 		this(Arrays.asList(shaders));
@@ -27,6 +38,7 @@ public class ShaderProgram {
 	public ShaderProgram(Collection<Shader> shaders) {
 		this.id = link(shaders);
 		this.cleanable = OpenGL.registerForGarbageCollect(this, () -> glDeleteProgram(id));
+		this.attributes = new ArrayList<>(0);
 	}
 
 	public void use() {
@@ -41,6 +53,22 @@ public class ShaderProgram {
 
 	public void delete() {
 		cleanable.clean();
+	}
+
+	protected FloatAttribute createFloatAttribute(String name, int size, boolean normalized) {
+		final var attribute = FloatAttribute.ofFloat(this, name, size, normalized);
+
+		attributes.add(attribute);
+
+		return attribute;
+	}
+
+	protected IntegerAttribute createIntegerAttribute(String name, int size, boolean unsigned) {
+		final var attribute = IntegerAttribute.ofInteger(this, name, size, unsigned);
+
+		attributes.add(attribute);
+
+		return attribute;
 	}
 
 	protected BooleanUniform createBooleanUniform(String name) {
@@ -59,12 +87,28 @@ public class ShaderProgram {
 		return new Sampler2dUniform(this, name);
 	}
 
-	protected FloatAttribute createFloatAttribute(String name, int size, boolean normalized) {
-		return FloatAttribute.ofFloat(this, name, size, normalized);
+	public void linkAttributes(VertexArray array) {
+		var stride = 0;
+		for (final var attribute : attributes) {
+			stride += attribute.getDataType().size();
+		}
+
+		linkAttributes(array, stride);
 	}
 
-	protected IntegerAttribute createIntegerAttribute(String name, int size, boolean unsigned) {
-		return IntegerAttribute.ofInteger(this, name, size, unsigned);
+	public void linkAttributes(VertexArray array, int stride) {
+		array.bind();
+		use();
+
+		var offset = 0;
+		for (final var attribute : attributes) {
+			attribute.link(stride, offset);
+
+			offset += attribute.getDataType().size();
+		}
+
+		unuse();
+		array.unbind();
 	}
 
 	private static int link(Collection<Shader> shaders) {
