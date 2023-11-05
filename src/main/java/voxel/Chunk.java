@@ -18,6 +18,7 @@ public class Chunk {
 	private Matrix4f modelMatrix;
 	private @Getter ChunkMesh mesh;
 	private boolean isEmpty;
+	private @Getter Vector3f center;
 	
 	public Chunk(ChunkShaderProgram shaderProgram, Vector3i position, World world) {
 		this.shaderProgram = shaderProgram;
@@ -25,6 +26,8 @@ public class Chunk {
 		this.world = world;
 		this.modelMatrix = computeModelMatrix();
 		this.isEmpty = true;
+		
+		this.center = new Vector3f(position).add(new Vector3f(0.5f)).mul(Settings.CHUNK_SIZE);
 	}
 	
 	private Matrix4f computeModelMatrix() {
@@ -38,8 +41,8 @@ public class Chunk {
 		mesh = new ChunkMesh(this, shaderProgram);
 	}
 	
-	public void render() {
-		if (isEmpty) {
+	public void render(Camera camera) {
+		if (isEmpty || !camera.getFrustum().contains(this)) {
 			return;
 		}
 		

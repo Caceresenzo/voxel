@@ -17,6 +17,7 @@ public class Camera {
 	private Vector3f forward;
 	private Matrix4f projection;
 	private Matrix4f view;
+	private Frustum frustum;
 	
 	public Camera(Vector3f position, float yaw, float pitch) {
 		this.position = position;
@@ -27,6 +28,8 @@ public class Camera {
 		this.forward = new Vector3f(0, 0, -1);
 		this.projection = new Matrix4f().perspective(Settings.VERTICAL_FOV, Settings.ASPECT_RATIO, Settings.NEAR, Settings.FAR);
 		this.view = new Matrix4f();
+		
+		this.frustum = new Frustum(this);
 	}
 	
 	public void update() {

@@ -44,9 +44,9 @@ public class World {
 		}
 	}
 	
-	public void render() {
+	public void render(Camera camera) {
 		for (final var chunk : chunks) {
-			chunk.render();
+			chunk.render(camera);
 		}
 	}
 	

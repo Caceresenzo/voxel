@@ -266,7 +266,7 @@ public class Main {
 	public void render() {
 		chunkShaderProgram.use();
 		chunkShaderProgram.view.load(player.getView());
-		world.render();
+		world.render(player);
 		OpenGL.checkErrors();
 	}
 
