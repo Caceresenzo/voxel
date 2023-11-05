@@ -26,7 +26,7 @@ public class VertexBuffer {
 		this.type = type;
 		this.usage = usage;
 
-		this.cleanable = OpenGL.registerForGarbageCollect(this, () -> glDeleteBuffers(id));
+		this.cleanable = OpenGL.registerForGarbageCollect(this, new DeleteAction(id));
 	}
 
 	public VertexBuffer bind() {
@@ -70,6 +70,15 @@ public class VertexBuffer {
 
 	public void delete() {
 		cleanable.clean();
+	}
+
+	private record DeleteAction(int bufferId) implements Runnable {
+
+		@Override
+		public void run() {
+			glDeleteBuffers(bufferId);
+		}
+
 	}
 
 }

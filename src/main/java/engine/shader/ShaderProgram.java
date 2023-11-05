@@ -37,7 +37,7 @@ public class ShaderProgram {
 
 	public ShaderProgram(Collection<Shader> shaders) {
 		this.id = link(shaders);
-		this.cleanable = OpenGL.registerForGarbageCollect(this, () -> glDeleteProgram(id));
+		this.cleanable = OpenGL.registerForGarbageCollect(this, new DeleteAction(id));
 		this.attributes = new ArrayList<>(0);
 	}
 
@@ -129,6 +129,15 @@ public class ShaderProgram {
 		}
 
 		return id;
+	}
+	
+	private record DeleteAction(int programId) implements Runnable {
+
+		@Override
+		public void run() {
+			glDeleteProgram(programId);
+		}
+		
 	}
 
 }

@@ -14,6 +14,10 @@ public class World {
 	public World(ChunkShaderProgram chunkShaderProgram) {
 		this.chunkShaderProgram = chunkShaderProgram;
 		
+		build();
+	}
+	
+	public void build() {
 		buildChunks();
 		buildChunkMeshes();
 	}

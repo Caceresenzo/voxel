@@ -1,10 +1,10 @@
 package voxel.mesh;
 
-import engine.shader.IntegerAttribute;
-import engine.shader.Matrix4fUniform;
-import engine.shader.Sampler2dUniform;
 import engine.shader.Shader;
 import engine.shader.ShaderProgram;
+import engine.shader.variable.attribute.IntegerAttribute;
+import engine.shader.variable.uniform.Matrix4fUniform;
+import engine.shader.variable.uniform.Sampler2dUniform;
 
 public class ChunkShaderProgram extends ShaderProgram {
 	

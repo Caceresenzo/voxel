@@ -16,16 +16,14 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.lwjgl.opengl.GL;
-
+import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
+import voxel.Main;
 
 @UtilityClass
 public class OpenGL {
 
 	private static Cleaner CLEANER = Cleaner.create();
-	private static boolean capabilitiesCreated = false;
-
 	private static final Map<Integer, String> ERRORS;
 
 	static {
@@ -51,15 +49,18 @@ public class OpenGL {
 	}
 
 	public Cleanable registerForGarbageCollect(Object object, Runnable action) {
-		return CLEANER.register(object, () -> {
-			if (!capabilitiesCreated) {
-				GL.createCapabilities();
-				capabilitiesCreated = true;
-			}
+//		System.out.println("registerForGarbageCollect: " + object + " -- " + action);
+		return CLEANER.register(object, new MoveToDeleteActionQueue(action));
+	}
 
-			System.out.println("OpenGL.registerForGarbageCollect()" + object);
-			action.run();
-		});
+	private record MoveToDeleteActionQueue(Runnable action) implements Runnable {
+
+		@Override
+		@SneakyThrows
+		public void run() {
+			Main.deleteActions.put(action);
+		}
+
 	}
 
 }

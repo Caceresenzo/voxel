@@ -12,43 +12,52 @@ import engine.util.OpenGL;
 import lombok.Getter;
 
 public class VertexArray {
-	
+
 	private final @Getter int id;
 	private final List<VertexBuffer> buffers;
 	private final Cleanable cleanable;
-	
+
 	public VertexArray() {
 		this.id = glGenVertexArrays();
 		OpenGL.checkErrors();
-		
+
 		this.buffers = new ArrayList<>();
-		
-		this.cleanable = OpenGL.registerForGarbageCollect(this, () -> glDeleteVertexArrays(id));
+
+		this.cleanable = OpenGL.registerForGarbageCollect(this, new DeleteAction(id));
 	}
-	
+
 	public VertexArray bind() {
 		glBindVertexArray(id);
 		OpenGL.checkErrors();
 		return this;
 	}
-	
+
 	public VertexArray unbind() {
 		glBindVertexArray(0);
 		OpenGL.checkErrors();
 		return this;
 	}
-	
+
 	public VertexArray add(VertexBuffer buffer) {
 		bind();
 		buffer.bind();
-		
+
 		buffers.add(buffer);
-		
+
 		return this;
 	}
-	
+
 	public void delete() {
 		cleanable.clean();
 	}
-	
+
+	private record DeleteAction(int arrayId) implements Runnable {
+
+		@Override
+		public void run() {
+			glDeleteVertexArrays(arrayId);
+		}
+
+	}
+
 }
