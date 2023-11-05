@@ -19,6 +19,7 @@ import static org.lwjgl.glfw.GLFW.glfwCreateWindow;
 import static org.lwjgl.glfw.GLFW.glfwDefaultWindowHints;
 import static org.lwjgl.glfw.GLFW.glfwDestroyWindow;
 import static org.lwjgl.glfw.GLFW.glfwGetPrimaryMonitor;
+import static org.lwjgl.glfw.GLFW.glfwGetTime;
 import static org.lwjgl.glfw.GLFW.glfwGetVideoMode;
 import static org.lwjgl.glfw.GLFW.glfwGetWindowSize;
 import static org.lwjgl.glfw.GLFW.glfwInit;
@@ -29,6 +30,7 @@ import static org.lwjgl.glfw.GLFW.glfwSetInputMode;
 import static org.lwjgl.glfw.GLFW.glfwSetKeyCallback;
 import static org.lwjgl.glfw.GLFW.glfwSetWindowPos;
 import static org.lwjgl.glfw.GLFW.glfwSetWindowShouldClose;
+import static org.lwjgl.glfw.GLFW.glfwSetWindowTitle;
 import static org.lwjgl.glfw.GLFW.glfwShowWindow;
 import static org.lwjgl.glfw.GLFW.glfwSwapBuffers;
 import static org.lwjgl.glfw.GLFW.glfwSwapInterval;
@@ -58,6 +60,7 @@ import org.lwjgl.Version;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
+import org.lwjgl.opengl.GLUtil;
 import org.lwjgl.system.MemoryStack;
 
 import engine.shader.Shader;
@@ -158,6 +161,8 @@ public class Main {
 		// bindings available for use.
 		GL.createCapabilities();
 
+		GLUtil.setupDebugMessageCallback(System.err);
+
 		// Set the clear color
 		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 		glEnable(GL_DEPTH_TEST);
@@ -170,9 +175,22 @@ public class Main {
 		System.gc();
 		System.gc();
 
+		double previousTime = glfwGetTime();
+		int frameCount = 0;
+
 		// Run the rendering loop until the user has attempted to close
 		// the window or has pressed the ESCAPE key.
 		while (!glfwWindowShouldClose(window)) {
+			double currentTime = glfwGetTime();
+			frameCount++;
+
+			if (currentTime - previousTime >= 1.0) {
+				glfwSetWindowTitle(window, "FPS: %d".formatted(frameCount));
+
+				frameCount = 0;
+				previousTime = currentTime;
+			}
+
 			Runnable deleteAction;
 			while ((deleteAction = deleteActions.poll()) != null) {
 				deleteAction.run();
