@@ -56,7 +56,11 @@ public class Chunk {
 					final var worldY = y + chunkPosition.y;
 					final var index = toVoxelIndex(x, y, z);
 
-					voxels[index] = (byte) 2;
+					if (y == localHeight - 1) {
+						voxels[index] = (byte) 2;
+					} else {
+						voxels[index] = (byte) 3;
+					}
 //					voxels[index] = (byte) (worldY + 1);
 //					voxels[index] = (byte) (position.x + position.y + position.z);
 				}
