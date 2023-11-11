@@ -65,4 +65,13 @@ public abstract class Attribute extends Variable {
 		glDisableVertexAttribArray(location);
 	}
 
+	public int getStride() {
+		return dataType.size() * size;
+	}
+
+	@Override
+	public String toString() {
+		return getClass().getSimpleName() + "[name=" + name + ", location=" + location + ", dataType=" + dataType + ", size=" + size + "]";
+	}
+
 }

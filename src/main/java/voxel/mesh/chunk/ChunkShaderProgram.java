@@ -1,4 +1,6 @@
-package voxel.mesh;
+package voxel.mesh.chunk;
+
+import java.io.IOException;
 
 import engine.shader.Shader;
 import engine.shader.ShaderProgram;
@@ -22,6 +24,18 @@ public class ChunkShaderProgram extends ShaderProgram {
 		this.view = createMatrix4fUniform("m_view");
 		this.atlas = createSamplerUniform("u_atlas");
 		this.packedData = createIntegerAttribute("packed_data", 1, true);
+	}
+
+	public static ChunkShaderProgram create() throws IOException {
+		try (
+			final var vertexInputStream = Shader.class.getResourceAsStream("/shaders/chunk.vert");
+			final var fragmentInputStream = Shader.class.getResourceAsStream("/shaders/chunk.frag");
+		) {
+			return new ChunkShaderProgram(
+				Shader.load(Shader.Type.VERTEX, vertexInputStream),
+				Shader.load(Shader.Type.FRAGMENT, fragmentInputStream)
+			);
+		}
 	}
 	
 }

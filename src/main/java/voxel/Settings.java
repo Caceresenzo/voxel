@@ -14,7 +14,7 @@ public class Settings {
 	public static final int CHUNK_VOLUME = CHUNK_AREA * CHUNK_HEIGHT;
 	public static final double CHUNK_SPHERE_RADIUS = HALF_CHUNK_SIZE * Math.sqrt(3);
 	
-	public static final int WORLD_WIDTH = 20;
+	public static final int WORLD_WIDTH = 5;
 	public static final int WORLD_HEIGHT = 3;
 	public static final int WORLD_DEPTH = WORLD_WIDTH;
 	public static final int WORLD_AREA = WORLD_WIDTH * WORLD_DEPTH;
@@ -38,6 +38,6 @@ public class Settings {
 	
 	public static final Vector3f WORLD_UP = new Vector3f(0, 1, 0);
 
-	public static final int MAX_RAY_DIST = 6;
+	public static final int MAX_RAY_DIST = 60;
 	
 }

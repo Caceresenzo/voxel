@@ -3,7 +3,7 @@ package voxel;
 import org.joml.Vector3i;
 
 import lombok.Getter;
-import voxel.mesh.ChunkShaderProgram;
+import voxel.mesh.chunk.ChunkShaderProgram;
 
 public class World {
 	

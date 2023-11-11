@@ -7,7 +7,7 @@ import engine.shader.ShaderProgram;
 
 public class IntegerAttribute extends Attribute {
 
-	protected IntegerAttribute(ShaderProgram program, String name, int size, DataType dataType) {
+	public IntegerAttribute(ShaderProgram program, String name, int size, DataType dataType) {
 		super(program, name, size, dataType);
 	}
 

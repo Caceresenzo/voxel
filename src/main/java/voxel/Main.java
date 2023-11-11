@@ -46,15 +46,12 @@ import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
 import static org.lwjgl.opengl.GL11.GL_CULL_FACE;
 import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
 import static org.lwjgl.opengl.GL11.GL_DEPTH_TEST;
-import static org.lwjgl.opengl.GL11.GL_FRONT_AND_BACK;
-import static org.lwjgl.opengl.GL11.GL_LINE;
 import static org.lwjgl.opengl.GL11.GL_ONE_MINUS_SRC_ALPHA;
 import static org.lwjgl.opengl.GL11.GL_SRC_ALPHA;
 import static org.lwjgl.opengl.GL11.glBlendFunc;
 import static org.lwjgl.opengl.GL11.glClear;
 import static org.lwjgl.opengl.GL11.glClearColor;
 import static org.lwjgl.opengl.GL11.glEnable;
-import static org.lwjgl.opengl.GL11.glPolygonMode;
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
@@ -70,13 +67,15 @@ import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GLUtil;
 import org.lwjgl.system.MemoryStack;
 
-import engine.shader.Shader;
 import engine.texture.Atlas;
 import engine.texture.ImageData;
 import engine.texture.Texture;
 import engine.util.OpenGL;
 import lombok.SneakyThrows;
-import voxel.mesh.ChunkShaderProgram;
+import voxel.mesh.chunk.ChunkShaderProgram;
+import voxel.mesh.marker.Marker;
+import voxel.mesh.marker.MarkerMesh;
+import voxel.mesh.marker.MarkerShaderProgram;
 
 public class Main {
 
@@ -188,9 +187,9 @@ public class Main {
 		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
-		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glEnable(GL_BLEND);
+//		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		initialize();
 		System.gc();
 		System.gc();
@@ -236,16 +235,18 @@ public class Main {
 	Player player;
 	ChunkShaderProgram chunkShaderProgram;
 	World world;
+	Texture frameTexture;
 	Texture texture;
 	Atlas atlas;
 	VoxelHandler voxelHandler;
 
+	MarkerShaderProgram markerShaderProgram;
+	MarkerMesh markerMesh;
+	Marker marker;
+
 	@SneakyThrows
 	public void initialize() {
-		chunkShaderProgram = new ChunkShaderProgram(
-			Shader.load(Shader.Type.VERTEX, getClass().getResourceAsStream("/shaders/chunk.vert")),
-			Shader.load(Shader.Type.FRAGMENT, getClass().getResourceAsStream("/shaders/chunk.frag"))
-		);
+		chunkShaderProgram = ChunkShaderProgram.create();
 
 		chunkShaderProgram.use();
 		chunkShaderProgram.atlas.load(1);
@@ -258,6 +259,10 @@ public class Main {
 		chunkShaderProgram.use();
 		chunkShaderProgram.projection.load(player.getProjection());
 
+		frameTexture = Texture.create(
+			ImageData.load(getClass().getResourceAsStream("/textures/frame.png"), false)
+		);
+
 		texture = Texture.create(
 			ImageData.load(getClass().getResourceAsStream("/textures/arrow.png"), false)
 		);
@@ -267,10 +272,15 @@ public class Main {
 			8
 		);
 
-		texture.activate(0);
-		atlas.activate(1);
-
 		voxelHandler = new VoxelHandler(player, world);
+
+		markerShaderProgram = MarkerShaderProgram.create();
+
+		markerShaderProgram.use();
+		markerShaderProgram.projection.load(player.getProjection());
+
+		markerMesh = new MarkerMesh(markerShaderProgram);
+		marker = new Marker(frameTexture, markerMesh);
 	}
 
 	public void update() {
@@ -279,9 +289,14 @@ public class Main {
 	}
 
 	public void render() {
+		texture.activate(0);
+		atlas.activate(1);
 		chunkShaderProgram.use();
 		chunkShaderProgram.view.load(player.getView());
 		world.render(player);
+
+		marker.render(player, voxelHandler);
+
 		OpenGL.checkErrors();
 	}
 

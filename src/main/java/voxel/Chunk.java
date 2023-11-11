@@ -1,13 +1,12 @@
 package voxel;
 
-import org.joml.Matrix4f;
 import org.joml.SimplexNoise;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 
 import lombok.Getter;
-import voxel.mesh.ChunkMesh;
-import voxel.mesh.ChunkShaderProgram;
+import voxel.mesh.chunk.ChunkMesh;
+import voxel.mesh.chunk.ChunkShaderProgram;
 
 public class Chunk {
 
@@ -15,7 +14,6 @@ public class Chunk {
 	private final @Getter Vector3i position;
 	private final @Getter World world;
 	private @Getter byte[] voxels;
-	private Matrix4f modelMatrix;
 	private @Getter ChunkMesh mesh;
 	private boolean isEmpty;
 	private @Getter Vector3f center;
@@ -24,17 +22,9 @@ public class Chunk {
 		this.shaderProgram = shaderProgram;
 		this.position = position;
 		this.world = world;
-		this.modelMatrix = computeModelMatrix();
 		this.isEmpty = true;
 
 		this.center = new Vector3f(position).add(new Vector3f(0.5f)).mul(Settings.CHUNK_SIZE);
-	}
-
-	private Matrix4f computeModelMatrix() {
-		final var worldPosition = new Vector3f(position);
-		worldPosition.mul(Settings.CHUNK_SIZE);
-
-		return new Matrix4f().translate(worldPosition);
 	}
 
 	public void buildMesh() {
@@ -46,8 +36,6 @@ public class Chunk {
 			return;
 		}
 
-		shaderProgram.use();
-		shaderProgram.model.load(modelMatrix);
 		mesh.render();
 	}
 

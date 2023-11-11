@@ -69,6 +69,14 @@ public class ShaderProgram {
 		return attribute;
 	}
 
+	protected IntegerAttribute createIntegerAttribute(String name, DataType dataType, int size) {
+		final var attribute = new IntegerAttribute(this, name, size, dataType);
+
+		attributes.add(attribute);
+
+		return attribute;
+	}
+
 	protected BooleanUniform createBooleanUniform(String name) {
 		return new BooleanUniform(this, name);
 	}
@@ -88,7 +96,7 @@ public class ShaderProgram {
 	public void linkAttributes(VertexArray array) {
 		var stride = 0;
 		for (final var attribute : attributes) {
-			stride += attribute.getDataType().size();
+			stride += attribute.getStride();
 		}
 
 		linkAttributes(array, stride);
@@ -102,11 +110,20 @@ public class ShaderProgram {
 		for (final var attribute : attributes) {
 			attribute.link(stride, offset);
 
-			offset += attribute.getDataType().size();
+			offset += attribute.getStride();
 		}
 
 		unuse();
 		array.unbind();
+	}
+
+	public int getAttributeSizes() {
+		var total = 0;
+		for (final var attribute : attributes) {
+			total += attribute.getSize();
+		}
+
+		return total;
 	}
 
 	private static int link(Collection<Shader> shaders) {
@@ -127,14 +144,14 @@ public class ShaderProgram {
 
 		return id;
 	}
-	
+
 	private record DeleteAction(int programId) implements Runnable {
 
 		@Override
 		public void run() {
 			glDeleteProgram(programId);
 		}
-		
+
 	}
 
 }

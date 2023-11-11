@@ -1,4 +1,4 @@
-package voxel.mesh;
+package voxel.mesh.chunk;
 
 public record AmbiantOcclusion(
 	int _0,

@@ -1,6 +1,5 @@
 package engine.texture;
 
-import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import java.io.IOException;
@@ -34,10 +33,6 @@ public class ImageData {
 			final var opeartion = new AffineTransformOp(transform, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
 			image = opeartion.filter(image, null);
 		}
-
-		Graphics2D graphic = image.createGraphics();
-		graphic.drawImage(image, null, 0, 0);
-		graphic.dispose();
 
 		final var pixels = new int[image.getWidth() * image.getHeight()];
 		image.getRGB(0, 0, image.getWidth(), image.getHeight(), pixels, 0, image.getWidth());

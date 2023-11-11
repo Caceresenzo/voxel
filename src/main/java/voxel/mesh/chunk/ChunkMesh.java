@@ -1,7 +1,10 @@
-package voxel.mesh;
+package voxel.mesh.chunk;
 
 import static org.lwjgl.opengl.GL11.GL_TRIANGLES;
 import static org.lwjgl.opengl.GL11.glDrawArrays;
+
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
 
 import engine.vertex.BufferType;
 import engine.vertex.UsageType;
@@ -14,15 +17,24 @@ import voxel.World;
 public class ChunkMesh {
 
 	private final Chunk chunk;
-	private final ChunkShaderProgram program;
+	private final ChunkShaderProgram shaderProgram;
 	private VertexArray vertexArray;
 	private int triangleCount;
+	private Matrix4f modelMatrix;
 
 	public ChunkMesh(Chunk chunk, ChunkShaderProgram shaderProgram) {
 		this.chunk = chunk;
-		this.program = shaderProgram;
+		this.shaderProgram = shaderProgram;
+		this.modelMatrix = computeModelMatrix();
 
 		createVertexArray();
+	}
+
+	private Matrix4f computeModelMatrix() {
+		final var worldPosition = new Vector3f(chunk.getPosition());
+		worldPosition.mul(Settings.CHUNK_SIZE);
+
+		return new Matrix4f().translate(worldPosition);
 	}
 
 	private void createVertexArray() {
@@ -33,7 +45,7 @@ public class ChunkMesh {
 
 		final var array = new VertexArray().add(buffer);
 
-		program.linkAttributes(array);
+		shaderProgram.linkAttributes(array);
 
 		if (vertexArray != null) {
 			vertexArray.delete(true);
@@ -48,7 +60,8 @@ public class ChunkMesh {
 	}
 
 	public void render() {
-		program.use();
+		shaderProgram.use();
+		shaderProgram.model.load(modelMatrix);
 		vertexArray.bind();
 
 		glDrawArrays(GL_TRIANGLES, 0, triangleCount);

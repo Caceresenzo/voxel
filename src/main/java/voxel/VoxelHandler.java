@@ -3,6 +3,7 @@ package voxel;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -11,13 +12,13 @@ public class VoxelHandler {
 	private final Player player;
 	private final World world;
 
-	private Vector3i currentVoxelPosition;
-	private Vector3i voxelWorldPosition;
-	private Vector3i voxelLocalPosition;
-	private Chunk chunk;
-	private byte voxelId;
-	private int voxelIndex;
-	private Vector3i voxelNormal;
+	private @Getter Vector3i currentVoxelPosition;
+	private @Getter Vector3i voxelWorldPosition;
+	private @Getter Vector3i voxelLocalPosition;
+	private @Getter Chunk chunk;
+	private @Getter byte voxelId;
+	private @Getter int voxelIndex;
+	private @Getter Vector3i voxelNormal;
 
 	public static float fract(float x) {
 		return (float) (x - Math.floor(x));
