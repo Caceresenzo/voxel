@@ -134,11 +134,11 @@ public class Main {
 		glfwSetMouseButtonCallback(window, (window, button, action, mods) -> {
 			if (action == GLFW_PRESS) {
 				if (button == GLFW_MOUSE_BUTTON_LEFT) {
-					voxelHandler.place();
-				}
-
-				if (button == GLFW_MOUSE_BUTTON_RIGHT) {
 					voxelHandler.destroy();
+				}
+				
+				if (button == GLFW_MOUSE_BUTTON_RIGHT) {
+					voxelHandler.place();
 				}
 			}
 		});
