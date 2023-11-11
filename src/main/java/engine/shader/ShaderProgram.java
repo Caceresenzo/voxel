@@ -20,7 +20,7 @@ import engine.shader.variable.attribute.IntegerAttribute;
 import engine.shader.variable.uniform.BooleanUniform;
 import engine.shader.variable.uniform.FloatUniform;
 import engine.shader.variable.uniform.Matrix4fUniform;
-import engine.shader.variable.uniform.Sampler2dUniform;
+import engine.shader.variable.uniform.SamplerUniform;
 import engine.util.OpenGL;
 import engine.vertex.VertexArray;
 import lombok.Getter;
@@ -81,8 +81,8 @@ public class ShaderProgram {
 		return new Matrix4fUniform(this, name);
 	}
 
-	protected Sampler2dUniform createSampler2dUniform(String name) {
-		return new Sampler2dUniform(this, name);
+	protected SamplerUniform createSamplerUniform(String name) {
+		return new SamplerUniform(this, name);
 	}
 
 	public void linkAttributes(VertexArray array) {

@@ -46,12 +46,15 @@ import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
 import static org.lwjgl.opengl.GL11.GL_CULL_FACE;
 import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
 import static org.lwjgl.opengl.GL11.GL_DEPTH_TEST;
+import static org.lwjgl.opengl.GL11.GL_FRONT_AND_BACK;
+import static org.lwjgl.opengl.GL11.GL_LINE;
 import static org.lwjgl.opengl.GL11.GL_ONE_MINUS_SRC_ALPHA;
 import static org.lwjgl.opengl.GL11.GL_SRC_ALPHA;
 import static org.lwjgl.opengl.GL11.glBlendFunc;
 import static org.lwjgl.opengl.GL11.glClear;
 import static org.lwjgl.opengl.GL11.glClearColor;
 import static org.lwjgl.opengl.GL11.glEnable;
+import static org.lwjgl.opengl.GL11.glPolygonMode;
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
@@ -68,6 +71,8 @@ import org.lwjgl.opengl.GLUtil;
 import org.lwjgl.system.MemoryStack;
 
 import engine.shader.Shader;
+import engine.texture.Atlas;
+import engine.texture.ImageData;
 import engine.texture.Texture;
 import engine.util.OpenGL;
 import lombok.SneakyThrows;
@@ -126,7 +131,7 @@ public class Main {
 			if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE)
 				glfwSetWindowShouldClose(window, true); // We will detect this in the rendering loop
 		});
-		
+
 		glfwSetMouseButtonCallback(window, (window, button, action, mods) -> {
 			if (action == GLFW_PRESS) {
 				if (button == GLFW_MOUSE_BUTTON_LEFT) {
@@ -185,7 +190,7 @@ public class Main {
 		glEnable(GL_CULL_FACE);
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		// glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		initialize();
 		System.gc();
 		System.gc();
@@ -232,6 +237,7 @@ public class Main {
 	ChunkShaderProgram chunkShaderProgram;
 	World world;
 	Texture texture;
+	Atlas atlas;
 	VoxelHandler voxelHandler;
 
 	@SneakyThrows
@@ -241,6 +247,9 @@ public class Main {
 			Shader.load(Shader.Type.FRAGMENT, getClass().getResourceAsStream("/shaders/chunk.frag"))
 		);
 
+		chunkShaderProgram.use();
+		chunkShaderProgram.atlas.load(1);
+
 		world = new World(chunkShaderProgram);
 
 		player = new Player();
@@ -249,12 +258,18 @@ public class Main {
 		chunkShaderProgram.use();
 		chunkShaderProgram.projection.load(player.getProjection());
 
-		texture = Texture.load(
-			getClass().getResourceAsStream("/textures/arrow.png")
+		texture = Texture.create(
+			ImageData.load(getClass().getResourceAsStream("/textures/arrow.png"), false)
+		);
+
+		atlas = Atlas.create(
+			ImageData.load(getClass().getResourceAsStream("/textures/atlas.png"), true),
+			8
 		);
 
 		texture.activate(0);
-		
+		atlas.activate(1);
+
 		voxelHandler = new VoxelHandler(player, world);
 	}
 
