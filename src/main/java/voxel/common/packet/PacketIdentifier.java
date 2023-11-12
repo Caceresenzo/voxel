@@ -1,8 +1,8 @@
 package voxel.common.packet;
 
-public record PacketIdentifier<T extends Packet<T>>(
+public record PacketIdentifier<T extends Packet>(
+	ConnectionState state,
 	int number,
-	String name,
-	PacketSerializer<T> serializer,
-	PacketDeserializer<T> deserializer
+	Class<T> clazz,
+	PacketSerializer<T> serializer
 ) {}

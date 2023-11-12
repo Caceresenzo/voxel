@@ -1,7 +1,5 @@
 package voxel.common.packet;
 
-public interface Packet<T extends Packet<T>> {
+public interface Packet {
 
-	PacketIdentifier<T> getPacketIdentifier();
-	
 }

@@ -5,36 +5,18 @@ import java.io.DataOutput;
 import java.io.IOException;
 
 import voxel.common.packet.Packet;
-import voxel.common.packet.PacketDeserializer;
-import voxel.common.packet.PacketIdentifier;
 import voxel.common.packet.PacketSerializer;
 
 public record PongPacket(
 	long payload
-) implements Packet<PongPacket> {
+) implements Packet {
 
-	public static PacketIdentifier<PongPacket> IDENTIFIER = new PacketIdentifier<>(
-		0x01,
-		"pong",
-		new Serializer(),
-		new Deserializer()
-	);
-
-	@Override
-	public PacketIdentifier<PongPacket> getPacketIdentifier() {
-		return IDENTIFIER;
-	}
-
-	public static class Serializer implements PacketSerializer<PongPacket> {
+	public static final PacketSerializer<PongPacket> SERIALIZER = new PacketSerializer<PongPacket>() {
 
 		@Override
 		public void serialize(PongPacket packet, DataOutput dataOutput) throws IOException {
 			dataOutput.writeLong(packet.payload);
 		}
-
-	}
-
-	public static class Deserializer implements PacketDeserializer<PongPacket> {
 
 		@Override
 		public PongPacket deserialize(DataInput dataInput) throws IOException {
@@ -43,6 +25,6 @@ public record PongPacket(
 			return new PongPacket(payload);
 		}
 
-	}
+	};
 
 }

@@ -1,4 +1,4 @@
-package voxel.common.packet.clientbound.login;
+package voxel.common.packet.serverbound.login;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -8,26 +8,26 @@ import java.util.UUID;
 import voxel.common.packet.Packet;
 import voxel.common.packet.PacketSerializer;
 
-public record LoginSuccessPacket(
+public record LoginStartPacket(
 	UUID uuid,
-	String name
+	String login
 ) implements Packet {
 
-	public static final PacketSerializer<LoginSuccessPacket> SERIALIZER = new PacketSerializer<LoginSuccessPacket>() {
+	public static final PacketSerializer<LoginStartPacket> SERIALIZER = new PacketSerializer<LoginStartPacket>() {
 
 		@Override
-		public void serialize(LoginSuccessPacket packet, DataOutput dataOutput) throws IOException {
+		public void serialize(LoginStartPacket packet, DataOutput dataOutput) throws IOException {
 			dataOutput.writeLong(packet.uuid.getMostSignificantBits());
 			dataOutput.writeLong(packet.uuid.getLeastSignificantBits());
-			dataOutput.writeUTF(packet.name);
+			dataOutput.writeUTF(packet.login);
 		}
 
 		@Override
-		public LoginSuccessPacket deserialize(DataInput dataInput) throws IOException {
+		public LoginStartPacket deserialize(DataInput dataInput) throws IOException {
 			final var uuid = new UUID(dataInput.readLong(), dataInput.readLong());
 			final var name = dataInput.readUTF();
 
-			return new LoginSuccessPacket(uuid, name);
+			return new LoginStartPacket(uuid, name);
 		}
 
 	};

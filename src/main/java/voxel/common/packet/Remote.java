@@ -20,21 +20,23 @@ public abstract class Remote {
 	public static final int MAX_PACKET_QUEUE_SIZE = 128;
 
 	private final Socket socket;
-	private final PacketRegistry packetRegistry;
 	protected ConnectionState state = ConnectionState.HANDSHAKE;
 
+	private final PacketRegistry readPacketRegistry;
 	private final Thread readThread;
 	private final byte[] readBuffer = new byte[MAX_PACKET_SIZE];
 
+	private final PacketRegistry writePacketRegistry;
 	private final Thread writeThread;
-	private final BlockingQueue<Packet<?>> writeQueue = new ArrayBlockingQueue<>(MAX_PACKET_QUEUE_SIZE, true);
+	private final BlockingQueue<Packet> writeQueue = new ArrayBlockingQueue<>(MAX_PACKET_QUEUE_SIZE, true);
 
-	public Remote(Socket socket, PacketRegistry packetRegistry, ThreadFactory threadFactory) {
+	public Remote(Socket socket, PacketRegistry readPacketRegistry, PacketRegistry writePacketRegistry, ThreadFactory threadFactory) {
 		this.socket = socket;
-		this.packetRegistry = packetRegistry;
 
+		this.readPacketRegistry = readPacketRegistry;
 		this.readThread = threadFactory.newThread(new ReadRunnable());
 		this.readThread.setName("%s-read-%d".formatted(getClass().getSimpleName(), socket.getPort()));
+		this.writePacketRegistry = writePacketRegistry;
 		this.writeThread = threadFactory.newThread(new WriteRunnable());
 		this.writeThread.setName("%s-write-%d".formatted(getClass().getSimpleName(), socket.getPort()));
 	}
@@ -55,11 +57,13 @@ public abstract class Remote {
 		writeThread.interrupt();
 	}
 
-	public void offer(Packet<?> packet) {
+	public void offer(Packet packet) {
 		writeQueue.offer(packet);
 	}
 
-	public abstract void onPacket(Packet<?> packet);
+	public abstract void onPacketReceived(Packet packet);
+
+	public abstract void onPacketSent(Packet packet);
 
 	public class ReadRunnable implements Runnable {
 
@@ -85,16 +89,15 @@ public abstract class Remote {
 //					System.out.println(PacketExchanger.this.getClass().getSimpleName() + ".readInt readBuffer");
 					inputStream.read(readBuffer, 0, length);
 
-					final var identifier = packetRegistry.get(state, packetId);
+					final var identifier = writePacketRegistry.get(state, packetId);
 					if (identifier == null) {
-						System.out.println("dropped packet with id: " + packetId + "(" + state + ", " + Remote.this.getClass().getSimpleName() + ")");
-						continue;
+						throw new IllegalStateException(Remote.this.getClass().getSimpleName() + ": " + packetId + " is not registered in " + state + " remote registry");
 					}
 
-					final PacketDeserializer deserializer = identifier.deserializer();
+					final PacketSerializer deserializer = identifier.serializer();
 					final var packet = deserializer.deserialize(new DataInputStream(new ByteArrayInputStream(readBuffer, 0, length)));
 
-					onPacket(packet);
+					onPacketReceived(packet);
 				}
 			} catch (Exception exception) {
 				if (!(exception instanceof InterruptedException)) {
@@ -127,7 +130,10 @@ public abstract class Remote {
 						continue;
 					}
 
-					final var identifier = packet.getPacketIdentifier();
+					final var identifier = readPacketRegistry.get(state, packet.getClass());
+					if (identifier == null) {
+						throw new IllegalStateException(Remote.this.getClass().getSimpleName() + ": " + packet.getClass().getSimpleName() + " is not registered in " + state + " local registry");
+					}
 
 					final var writeStream = new ByteArrayOutputStream();
 
@@ -138,6 +144,8 @@ public abstract class Remote {
 					outputStream.writeInt(bytes.length + Integer.BYTES);
 					outputStream.writeInt(identifier.number());
 					outputStream.write(bytes);
+					
+					onPacketSent(packet);
 				}
 			} catch (Exception exception) {
 				if (!(exception instanceof InterruptedException)) {

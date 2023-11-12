@@ -7,24 +7,48 @@ import java.util.Map;
 
 public class PacketRegistry {
 
-	private final Map<ConnectionState, Map<Integer, PacketIdentifier<?>>> registry = new EnumMap<>(ConnectionState.class);
+	private final Map<ConnectionState, StatePacketRegistry> stateRegistries = new EnumMap<>(ConnectionState.class);
 
 	public PacketRegistry() {
 		Arrays.stream(ConnectionState.values())
-			.forEach((state) -> registry.put(state, new HashMap<>()));
+			.forEach((state) -> stateRegistries.put(state, new StatePacketRegistry()));
 	}
 
-	public PacketIdentifier<?> get(ConnectionState state, int number) {
-		return registry.get(state).get(number);
+	public <T extends Packet> void register(ConnectionState state, int number, Class<T> clazz, PacketSerializer<T> serializer) {
+		register(new PacketIdentifier<T>(state, number, clazz, serializer));
 	}
 
 	public void register(PacketIdentifier<?> identifier) {
-		Arrays.stream(ConnectionState.values())
-			.forEach((state) -> register(state, identifier));
+		stateRegistries.get(identifier.state()).register(identifier);
 	}
 
-	public void register(ConnectionState state, PacketIdentifier<?> identifier) {
-		registry.get(state).put(identifier.number(), identifier);
+	public PacketIdentifier<?> get(ConnectionState state, int number) {
+		return stateRegistries.get(state).get(number);
+	}
+
+	public PacketIdentifier<?> get(ConnectionState state, Class<?> clazz) {
+		return stateRegistries.get(state).get(clazz);
+	}
+
+	private static class StatePacketRegistry {
+
+		private final Map<Integer, PacketIdentifier<?>> numberToIdentifier = new HashMap<>();
+		private final Map<Class<? extends Packet>, PacketIdentifier<?>> classToIdentifier = new HashMap<>();
+
+		public void register(PacketIdentifier<?> identifier) {
+			System.out.println(identifier);
+			numberToIdentifier.put(identifier.number(), identifier);
+			classToIdentifier.put(identifier.clazz(), identifier);
+		}
+
+		public PacketIdentifier<?> get(int number) {
+			return numberToIdentifier.get(number);
+		}
+
+		public PacketIdentifier<?> get(Class<?> clazz) {
+			return classToIdentifier.get(clazz);
+		}
+
 	}
 
 }

@@ -5,6 +5,7 @@ import java.util.UUID;
 import java.util.concurrent.ThreadFactory;
 
 import voxel.common.packet.Packet;
+import voxel.common.packet.PacketRegistries;
 import voxel.common.packet.Remote;
 import voxel.common.packet.clientbound.login.LoginSuccessPacket;
 import voxel.common.packet.clientbound.other.PongPacket;
@@ -12,7 +13,7 @@ import voxel.common.packet.clientbound.status.StatusResponsePacket;
 import voxel.common.packet.serverbound.ServerBoundPacketHandler;
 import voxel.common.packet.serverbound.handshake.HandshakePacket;
 import voxel.common.packet.serverbound.login.LoginAcknowledgedPacket;
-import voxel.common.packet.serverbound.login.LoginPacket;
+import voxel.common.packet.serverbound.login.LoginStartPacket;
 import voxel.common.packet.serverbound.other.PingPacket;
 import voxel.common.packet.serverbound.status.StatusRequestPacket;
 
@@ -23,24 +24,23 @@ public class RemoteClient extends Remote implements ServerBoundPacketHandler<Rem
 	private String login;
 
 	public RemoteClient(Server server, Socket socket, ThreadFactory threadFactory) {
-		super(socket, server.getPacketRegistry(), threadFactory);
+		super(
+			socket,
+			PacketRegistries.CLIENT_BOUND,
+			PacketRegistries.SERVER_BOUND,
+			threadFactory
+		);
 
 		this.server = server;
 	}
 
 	@Override
-	public void onPacket(Packet<?> packet) {
-		if (packet instanceof HandshakePacket packet_) {
-			onHandshake(this, packet_);
-		} else if (packet instanceof PingPacket packet_) {
-			onPing(this, packet_);
-		} else if (packet instanceof StatusRequestPacket packet_) {
-			onStatusRequest(this, packet_);
-		} else if (packet instanceof LoginPacket packet_) {
-			onLogin(this, packet_);
-		} else if (packet instanceof LoginAcknowledgedPacket packet_) {
-			onLoginAcknowledged(this, packet_);
-		}
+	public void onPacketReceived(Packet packet) {
+		ServerBoundPacketHandler.dispatch(this, this, packet);
+	}
+	
+	@Override
+	public void onPacketSent(Packet packet) {
 	}
 
 	@Override
@@ -63,10 +63,10 @@ public class RemoteClient extends Remote implements ServerBoundPacketHandler<Rem
 	}
 
 	@Override
-	public void onLogin(RemoteClient remote, LoginPacket packet) {
+	public void onLogin(RemoteClient remote, LoginStartPacket packet) {
 		uuid = packet.uuid();
 		login = packet.login();
-		
+
 		remote.offer(new LoginSuccessPacket(uuid, login));
 	}
 

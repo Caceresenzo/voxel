@@ -6,20 +6,11 @@ import java.io.IOException;
 
 import voxel.common.packet.ConnectionState;
 import voxel.common.packet.Packet;
-import voxel.common.packet.PacketDeserializer;
-import voxel.common.packet.PacketIdentifier;
 import voxel.common.packet.PacketSerializer;
 
 public record HandshakePacket(
 	ConnectionState nextState
-) implements Packet<HandshakePacket> {
-
-	public static PacketIdentifier<HandshakePacket> IDENTIFIER = new PacketIdentifier<>(
-		0x00,
-		"handshake",
-		new Serializer(),
-		new Deserializer()
-	);
+) implements Packet {
 
 	public HandshakePacket {
 		if (!ConnectionState.STATUS.equals(nextState) && !ConnectionState.LOGIN.equals(nextState)) {
@@ -27,21 +18,12 @@ public record HandshakePacket(
 		}
 	}
 
-	@Override
-	public PacketIdentifier<HandshakePacket> getPacketIdentifier() {
-		return IDENTIFIER;
-	}
-
-	public static class Serializer implements PacketSerializer<HandshakePacket> {
+	public static final PacketSerializer<HandshakePacket> SERIALIZER = new PacketSerializer<HandshakePacket>() {
 
 		@Override
 		public void serialize(HandshakePacket packet, DataOutput dataOutput) throws IOException {
 			dataOutput.writeByte(packet.nextState.ordinal());
 		}
-
-	}
-
-	public static class Deserializer implements PacketDeserializer<HandshakePacket> {
 
 		@Override
 		public HandshakePacket deserialize(DataInput dataInput) throws IOException {
@@ -50,6 +32,6 @@ public record HandshakePacket(
 			return new HandshakePacket(nextState);
 		}
 
-	}
+	};
 
 }

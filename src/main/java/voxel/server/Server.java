@@ -9,21 +9,18 @@ import java.util.List;
 import java.util.concurrent.ThreadFactory;
 
 import lombok.Getter;
-import voxel.common.packet.PacketRegistry;
 
 public class Server implements Runnable {
 
 	private final @Getter String name;
-	private final @Getter PacketRegistry packetRegistry;
 	private final ServerSocket serverSocket;
 	private final ThreadFactory threadFactory;
 	private final Thread thread;
 
 	private final List<RemoteClient> clients;
 
-	public Server(String name, PacketRegistry packetRegistry, ServerSocket serverSocket, ThreadFactory threadFactory) {
+	public Server(String name, ServerSocket serverSocket, ThreadFactory threadFactory) {
 		this.name = name;
-		this.packetRegistry = packetRegistry;
 		this.serverSocket = serverSocket;
 		this.threadFactory = threadFactory;
 		this.thread = threadFactory.newThread(this);
@@ -66,10 +63,10 @@ public class Server implements Runnable {
 		return clients.size();
 	}
 
-	public static Server create(PacketRegistry packetRegistry, String name, int port) throws IOException {
+	public static Server create(String name, int port) throws IOException {
 		final var serverSocket = new ServerSocket(port);
 
-		return new Server(name, packetRegistry, serverSocket, Thread.ofVirtual().factory());
+		return new Server(name, serverSocket, Thread.ofVirtual().factory());
 	}
 
 }
