@@ -31,9 +31,9 @@ public class Bootstrap {
 		client.start();
 
 		client.offer(new HandshakePacket(ConnectionState.LOGIN));
-
 		client.login(UUID.randomUUID(), "Enzo");
 
+//		client.offer(new HandshakePacket(ConnectionState.STATUS));
 //		client.offer(new StatusRequestPacket());
 //		client.offer(new PingPacket(System.currentTimeMillis()));
 
@@ -72,11 +72,13 @@ public class Bootstrap {
 		public void onPacketReceived(Packet packet) {
 			ClientBoundPacketHandler.dispatch(this, this, packet);
 		}
-		
+
 		@Override
 		public void onPacketSent(Packet packet) {
 			if (packet instanceof HandshakePacket packet_) {
 				state = packet_.nextState();
+			} else if (packet instanceof LoginAcknowledgedPacket) {
+				state = ConnectionState.PLAY;
 			}
 		}
 

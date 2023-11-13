@@ -4,6 +4,7 @@ import java.net.Socket;
 import java.util.UUID;
 import java.util.concurrent.ThreadFactory;
 
+import voxel.common.packet.ConnectionState;
 import voxel.common.packet.Packet;
 import voxel.common.packet.PacketRegistries;
 import voxel.common.packet.Remote;
@@ -72,6 +73,7 @@ public class RemoteClient extends Remote implements ServerBoundPacketHandler<Rem
 
 	@Override
 	public void onLoginAcknowledged(RemoteClient remote, LoginAcknowledgedPacket packet) {
+		remote.state = ConnectionState.PLAY;
 		System.out.println("onLoginAcknowledged");
 	}
 
