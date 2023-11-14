@@ -1,15 +1,16 @@
 package voxel.common.packet;
 
-import java.io.DataInput;
-import java.io.DataOutput;
 import java.io.IOException;
 import java.util.function.Supplier;
 
+import voxel.common.data.BufferReader;
+import voxel.common.data.BufferWritter;
+
 public interface PacketSerializer<T extends Packet> {
 
-	void serialize(T packet, DataOutput dataOutput) throws IOException;
+	void serialize(T packet, BufferWritter output) throws IOException;
 
-	T deserialize(DataInput dataInput) throws IOException;
+	T deserialize(BufferReader input) throws IOException;
 
 	public static <T extends Packet> PacketSerializer<T> noField(Supplier<T> factory) {
 		return new NoFieldSerializer<>(factory);
@@ -20,12 +21,12 @@ public interface PacketSerializer<T extends Packet> {
 	) implements PacketSerializer<T> {
 
 		@Override
-		public void serialize(T packet, DataOutput dataOutput) throws IOException {
+		public void serialize(T packet, BufferWritter output) throws IOException {
 
 		}
 
 		@Override
-		public T deserialize(DataInput dataInput) throws IOException {
+		public T deserialize(BufferReader input) throws IOException {
 			return factory.get();
 		}
 

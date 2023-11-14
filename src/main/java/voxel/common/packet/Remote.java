@@ -1,7 +1,5 @@
 package voxel.common.packet;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.EOFException;
@@ -13,6 +11,8 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 import lombok.SneakyThrows;
+import voxel.common.data.ArrayBufferReader;
+import voxel.common.data.ArrayBufferWriter;
 
 public abstract class Remote {
 
@@ -29,6 +29,7 @@ public abstract class Remote {
 	private final PacketRegistry writePacketRegistry;
 	private final Thread writeThread;
 	private final BlockingQueue<Packet> writeQueue = new ArrayBlockingQueue<>(MAX_PACKET_QUEUE_SIZE, true);
+	private final byte[] writeBuffer = new byte[MAX_PACKET_SIZE];
 
 	public Remote(Socket socket, PacketRegistry readPacketRegistry, PacketRegistry writePacketRegistry, ThreadFactory threadFactory) {
 		this.socket = socket;
@@ -71,22 +72,18 @@ public abstract class Remote {
 		@SneakyThrows
 		@SuppressWarnings("rawtypes")
 		public void run() {
-//			System.out.println(PacketExchanger.this.getClass().getSimpleName() + ".ReadRunnable.run()");
+			final var input = new ArrayBufferReader(readBuffer);
 
 			try {
 				final var inputStream = new DataInputStream(socket.getInputStream());
 
 				while (socket.isConnected()) {
-//					System.out.println(PacketExchanger.this.getClass().getSimpleName() + ".readInt length");
 					final var length = inputStream.readInt() - Integer.BYTES;
 					if (length < 0 || length >= readBuffer.length) {
 						throw new RuntimeException("invalid buffer length: " + length);
 					}
 
-//					System.out.println(PacketExchanger.this.getClass().getSimpleName() + ".readInt packetId");
 					final var packetId = inputStream.readInt();
-
-//					System.out.println(PacketExchanger.this.getClass().getSimpleName() + ".readInt readBuffer");
 					inputStream.read(readBuffer, 0, length);
 
 					final var identifier = writePacketRegistry.get(state, packetId);
@@ -95,7 +92,7 @@ public abstract class Remote {
 					}
 
 					final PacketSerializer deserializer = identifier.serializer();
-					final var packet = deserializer.deserialize(new DataInputStream(new ByteArrayInputStream(readBuffer, 0, length)));
+					final var packet = deserializer.deserialize(input.resetIndex());
 
 					onPacketReceived(packet);
 				}
@@ -119,7 +116,7 @@ public abstract class Remote {
 		@Override
 		@SneakyThrows
 		public void run() {
-//			System.out.println(PacketExchanger.this.getClass().getSimpleName() + ".WriteRunnable.run()");
+			final var writer = new ArrayBufferWriter(writeBuffer);
 
 			try {
 				final var outputStream = new DataOutputStream(socket.getOutputStream());
@@ -129,22 +126,20 @@ public abstract class Remote {
 					if (packet == null) {
 						continue;
 					}
-
+					
 					final var identifier = readPacketRegistry.get(state, packet.getClass());
 					if (identifier == null) {
 						throw new IllegalStateException(Remote.this.getClass().getSimpleName() + ": " + packet.getClass().getSimpleName() + " is not registered in " + state + " local registry");
 					}
 
-					final var writeStream = new ByteArrayOutputStream();
-
 					final PacketSerializer serializer = identifier.serializer();
-					serializer.serialize(packet, new DataOutputStream(writeStream));
+					serializer.serialize(packet, writer.resetIndex());
 
-					final var bytes = writeStream.toByteArray();
-					outputStream.writeInt(bytes.length + Integer.BYTES);
+					final var length = writer.getIndex();
+					outputStream.writeInt(length + Integer.BYTES);
 					outputStream.writeInt(identifier.number());
-					outputStream.write(bytes);
-					
+					outputStream.write(writeBuffer, 0, length);
+
 					onPacketSent(packet);
 				}
 			} catch (Exception exception) {

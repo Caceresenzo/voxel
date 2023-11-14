@@ -1,9 +1,9 @@
 package voxel.common.packet.clientbound.status;
 
-import java.io.DataInput;
-import java.io.DataOutput;
 import java.io.IOException;
 
+import voxel.common.data.BufferReader;
+import voxel.common.data.BufferWritter;
 import voxel.common.packet.Packet;
 import voxel.common.packet.PacketSerializer;
 
@@ -15,15 +15,15 @@ public record StatusResponsePacket(
 	public static final PacketSerializer<StatusResponsePacket> SERIALIZER = new PacketSerializer<StatusResponsePacket>() {
 
 		@Override
-		public void serialize(StatusResponsePacket packet, DataOutput dataOutput) throws IOException {
-			dataOutput.writeUTF(packet.serverName);
-			dataOutput.writeLong(packet.playerCount);
+		public void serialize(StatusResponsePacket packet, BufferWritter output) throws IOException {
+			output.writeAsciiString(packet.serverName);
+			output.writeLong(packet.playerCount);
 		}
 
 		@Override
-		public StatusResponsePacket deserialize(DataInput dataInput) throws IOException {
-			final var serverName = dataInput.readUTF();
-			final var playerCount = dataInput.readLong();
+		public StatusResponsePacket deserialize(BufferReader input) throws IOException {
+			final var serverName = input.readAsciiString();
+			final var playerCount = input.readLong();
 
 			return new StatusResponsePacket(serverName, playerCount);
 		}

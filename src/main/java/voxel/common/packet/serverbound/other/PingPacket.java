@@ -1,9 +1,9 @@
 package voxel.common.packet.serverbound.other;
 
-import java.io.DataInput;
-import java.io.DataOutput;
 import java.io.IOException;
 
+import voxel.common.data.BufferReader;
+import voxel.common.data.BufferWritter;
 import voxel.common.packet.Packet;
 import voxel.common.packet.PacketSerializer;
 
@@ -14,13 +14,13 @@ public record PingPacket(
 	public static final PacketSerializer<PingPacket> SERIALIZER = new PacketSerializer<PingPacket>() {
 
 		@Override
-		public void serialize(PingPacket packet, DataOutput dataOutput) throws IOException {
-			dataOutput.writeLong(packet.payload);
+		public void serialize(PingPacket packet, BufferWritter output) throws IOException {
+			output.writeLong(packet.payload);
 		}
 
 		@Override
-		public PingPacket deserialize(DataInput dataInput) throws IOException {
-			final var payload = dataInput.readLong();
+		public PingPacket deserialize(BufferReader input) throws IOException {
+			final var payload = input.readLong();
 
 			return new PingPacket(payload);
 		}
