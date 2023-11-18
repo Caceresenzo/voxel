@@ -19,7 +19,6 @@ public class ChunkMesh {
 	private final Chunk chunk;
 	private final ChunkShaderProgram shaderProgram;
 	private VertexArray vertexArray;
-	private int triangleCount;
 	private Matrix4f modelMatrix;
 
 	public ChunkMesh(Chunk chunk, ChunkShaderProgram shaderProgram) {
@@ -43,15 +42,13 @@ public class ChunkMesh {
 		final var buffer = new VertexBuffer(BufferType.ARRAY, UsageType.STATIC_DRAW);
 		buffer.store(vertexData);
 
-		final var array = new VertexArray().add(buffer);
-
-		shaderProgram.linkAttributes(array);
+		final var array = new VertexArray(shaderProgram);
+		array.add(buffer);
 
 		if (vertexArray != null) {
 			vertexArray.delete(true);
 		}
 
-		this.triangleCount = vertexData.length;
 		this.vertexArray = array;
 	}
 
@@ -62,9 +59,7 @@ public class ChunkMesh {
 	public void render() {
 		shaderProgram.use();
 		shaderProgram.model.load(modelMatrix);
-		vertexArray.bind();
-
-		glDrawArrays(GL_TRIANGLES, 0, triangleCount);
+		vertexArray.render();
 	}
 
 	private int getChunkIndex(int worldX, int worldY, int worldZ) {
@@ -173,7 +168,7 @@ public class ChunkMesh {
 			| (flipId));
 	}
 
-//	static int[] vertices = new int[Settings.CHUNK_VOLUME * 36];
+	//	static int[] vertices = new int[Settings.CHUNK_VOLUME * 36];
 
 	private int[] getVertexData() {
 		var vertices = new int[Settings.CHUNK_VOLUME * 36];
@@ -385,8 +380,8 @@ public class ChunkMesh {
 		final var trimmed = new int[index];
 		System.arraycopy(vertices, 0, trimmed, 0, trimmed.length);
 
-//		vertices = null;
-//		System.gc();
+		//		vertices = null;
+		//		System.gc();
 
 		return trimmed;
 	}

@@ -74,4 +74,13 @@ public abstract class Attribute extends Variable {
 		return getClass().getSimpleName() + "[name=" + name + ", location=" + location + ", dataType=" + dataType + ", size=" + size + "]";
 	}
 
+	public static int sumStride(Iterable<Attribute> attributes) {
+		var stride = 0;
+		for (final var attribute : attributes) {
+			stride += attribute.getStride();
+		}
+
+		return stride;
+	}
+
 }

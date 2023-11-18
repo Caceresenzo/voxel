@@ -1,13 +1,12 @@
 package voxel.client.graphics.mesh.marker;
 
-import static org.lwjgl.opengl.GL11.GL_TRIANGLES;
-import static org.lwjgl.opengl.GL11.glDrawArrays;
+import java.util.List;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.joml.Matrix4f;
 import org.joml.Vector3i;
 
 import voxel.client.Camera;
-import voxel.client.graphics.opengl.util.MathUtils;
 import voxel.client.graphics.opengl.vertex.BufferType;
 import voxel.client.graphics.opengl.vertex.UsageType;
 import voxel.client.graphics.opengl.vertex.VertexArray;
@@ -17,7 +16,6 @@ public class MarkerMesh {
 
 	private final MarkerShaderProgram shaderProgram;
 	private VertexArray vertexArray;
-	private int triangleCount;
 	private Matrix4f modelMatrix;
 
 	public MarkerMesh(MarkerShaderProgram shaderProgram) {
@@ -30,7 +28,7 @@ public class MarkerMesh {
 	public void move(int x, int y, int z) {
 		modelMatrix.identity().translate(x, y, z);
 	}
-	
+
 	public void move(Vector3i position) {
 		modelMatrix.identity().translate(position.x, position.y, position.z);
 	}
@@ -38,19 +36,20 @@ public class MarkerMesh {
 	private void createVertexArray() {
 		final var vertexData = getVertexData();
 
-		final var buffer = new VertexBuffer(BufferType.ARRAY, UsageType.STATIC_DRAW);
-		buffer.store(vertexData);
+		final var textureCoordinatesBuffer = new VertexBuffer(BufferType.ARRAY, UsageType.STATIC_DRAW);
+		textureCoordinatesBuffer.store(vertexData.getLeft());
 
-		final var array = new VertexArray().add(buffer);
+		final var positionsBuffer = new VertexBuffer(BufferType.ARRAY, UsageType.STATIC_DRAW);
+		positionsBuffer.store(vertexData.getRight());
 
-		shaderProgram.use();
-		shaderProgram.linkAttributes(array);
+		final var array = new VertexArray(shaderProgram);
+		array.add(textureCoordinatesBuffer, List.of(shaderProgram.textureCoordinate));
+		array.add(positionsBuffer, List.of(shaderProgram.position));
 
 		if (vertexArray != null) {
 			vertexArray.delete(true);
 		}
 
-		this.triangleCount = vertexData.length / shaderProgram.getAttributeSizes();
 		this.vertexArray = array;
 	}
 
@@ -59,12 +58,11 @@ public class MarkerMesh {
 		shaderProgram.view.load(camera.getView());
 		shaderProgram.model.load(modelMatrix);
 		shaderProgram.texture.load(0);
-		vertexArray.bind();
-
-		glDrawArrays(GL_TRIANGLES, 0, triangleCount);
+		vertexArray.render();
 	}
 
-	private float[] getVertexData() {
+	private Pair<float[], float[]> getVertexData() {
+		// @formatter:off
 		final var positions = pack(
 			new byte[][] {
 				{ 0, 0, 1 }, { 1, 0, 1 }, { 1, 1, 1 }, { 0, 1, 1 },
@@ -95,10 +93,7 @@ public class MarkerMesh {
 			}
 		);
 		
-		return MathUtils.horizontalStack(
-			textureCoordinates, 2,
-			positions, 3
-		);
+		return Pair.of(textureCoordinates, positions);
 	}
 
 	public static float[] pack(byte[][] vertices, byte[][] indices) {

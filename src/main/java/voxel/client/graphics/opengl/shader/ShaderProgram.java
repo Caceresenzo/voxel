@@ -12,6 +12,7 @@ import java.lang.ref.Cleaner.Cleanable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import lombok.Getter;
@@ -124,6 +125,10 @@ public class ShaderProgram {
 		}
 
 		return total;
+	}
+
+	public List<Attribute> getAttributes() {
+		return Collections.unmodifiableList(attributes);
 	}
 
 	private static int link(Collection<Shader> shaders) {

@@ -21,6 +21,7 @@ public class VertexBuffer {
 	private final @Getter BufferType type;
 	private final @Getter UsageType usage;
 	private final Cleanable cleanable;
+	private @Getter int sizeInBytes;
 
 	public VertexBuffer(BufferType type, UsageType usage) {
 		this.id = glGenBuffers();
@@ -30,6 +31,8 @@ public class VertexBuffer {
 		this.usage = usage;
 
 		this.cleanable = OpenGL.registerForGarbageCollect(this, new DeleteAction(id));
+
+		this.sizeInBytes = 0;
 	}
 
 	public VertexBuffer bind() {
@@ -40,12 +43,14 @@ public class VertexBuffer {
 	public VertexBuffer store(float[] data) {
 		bind();
 		glBufferData(type.value(), data, usage.value());
+		sizeInBytes = data.length * Float.BYTES;
 		return this;
 	}
 
 	public VertexBuffer store(int[] data) {
 		bind();
 		glBufferData(type.value(), data, usage.value());
+		sizeInBytes = data.length * Integer.BYTES;
 		return this;
 	}
 
@@ -57,6 +62,8 @@ public class VertexBuffer {
 		buffer.put(data).flip();
 
 		glBufferData(type.value(), buffer, usage.value());
+		sizeInBytes = data.length;
+
 		MemoryUtil.memFree(buffer);
 		return this;
 	}
