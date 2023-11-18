@@ -18,7 +18,7 @@ import java.util.Map;
 
 import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
-import voxel.client.Main;
+import voxel.client.game.Game;
 
 @UtilityClass
 public class OpenGL {
@@ -58,7 +58,7 @@ public class OpenGL {
 		@Override
 		@SneakyThrows
 		public void run() {
-			Main.deleteActions.put(action);
+			Game.deleteActions.put(action);
 		}
 
 	}

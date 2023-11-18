@@ -62,6 +62,16 @@ public class Server implements Runnable {
 	public long getClientCount() {
 		return clients.size();
 	}
+	
+	public List<RemoteClient> getClients() {
+		return Collections.unmodifiableList(clients);
+	}
+	
+	public List<RemoteClient> getAuthenticatedClients() {
+		return clients.stream()
+			.filter(RemoteClient::isAuthenticated)
+			.toList();
+	}
 
 	public static Server create(String name, int port) throws IOException {
 		final var serverSocket = new ServerSocket(port);

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -12,7 +13,7 @@ public class ArrayBufferReader implements BufferReader {
 
 	private final byte[] buffer = new byte[Long.BYTES];
 	private final byte[] array;
-	private int index;
+	private @Getter int index;
 
 	public ArrayBufferReader resetIndex() {
 		index = 0;
@@ -25,7 +26,7 @@ public class ArrayBufferReader implements BufferReader {
 			return -1;
 		}
 
-		return this.array[index++];
+		return Byte.toUnsignedInt(this.array[index++]);
 	}
 
 	@Override
@@ -35,8 +36,8 @@ public class ArrayBufferReader implements BufferReader {
 
 	@Override
 	public void read(byte[] buffer, int offset, int length) throws IOException {
-		for (var index = 0; index < length; ++index) {
-			buffer[offset + index] = readByte();
+		for (var jndex = 0; jndex < length; ++jndex) {
+			buffer[offset + jndex] = readByte();
 		}
 	}
 

@@ -2,7 +2,6 @@ package voxel.common.packet;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.EOFException;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -16,8 +15,8 @@ import voxel.common.data.ArrayBufferWriter;
 
 public abstract class Remote {
 
-	public static final int MAX_PACKET_SIZE = 2048;
-	public static final int MAX_PACKET_QUEUE_SIZE = 128;
+	public static final int MAX_PACKET_SIZE = 8192;
+	public static final int MAX_PACKET_QUEUE_SIZE = 1024;
 
 	private final Socket socket;
 	protected ConnectionState state = ConnectionState.HANDSHAKE;
@@ -74,10 +73,10 @@ public abstract class Remote {
 		public void run() {
 			final var input = new ArrayBufferReader(readBuffer);
 
-			try {
-				final var inputStream = new DataInputStream(socket.getInputStream());
+			final var inputStream = new DataInputStream(socket.getInputStream());
 
-				while (socket.isConnected()) {
+			while (socket.isConnected()) {
+				try {
 					final var length = inputStream.readInt() - Integer.BYTES;
 					if (length < 0 || length >= readBuffer.length) {
 						throw new RuntimeException("invalid buffer length: " + length);
@@ -95,14 +94,11 @@ public abstract class Remote {
 					final var packet = deserializer.deserialize(input.resetIndex());
 
 					onPacketReceived(packet);
-				}
-			} catch (Exception exception) {
-				if (!(exception instanceof InterruptedException)) {
-					throw exception;
-				}
+				} catch (Exception exception) {
+					if (Thread.interrupted()) {
+						break;
+					}
 
-				System.out.println(socket);
-				if (exception instanceof EOFException && !socket.isClosed()) {
 					throw exception;
 				}
 			}
@@ -118,15 +114,15 @@ public abstract class Remote {
 		public void run() {
 			final var writer = new ArrayBufferWriter(writeBuffer);
 
-			try {
-				final var outputStream = new DataOutputStream(socket.getOutputStream());
+			final var outputStream = new DataOutputStream(socket.getOutputStream());
 
-				while (socket.isConnected()) {
+			while (socket.isConnected()) {
+				try {
 					final var packet = writeQueue.poll(1, TimeUnit.HOURS);
 					if (packet == null) {
 						continue;
 					}
-					
+
 					final var identifier = readPacketRegistry.get(state, packet.getClass());
 					if (identifier == null) {
 						throw new IllegalStateException(Remote.this.getClass().getSimpleName() + ": " + packet.getClass().getSimpleName() + " is not registered in " + state + " local registry");
@@ -141,9 +137,11 @@ public abstract class Remote {
 					outputStream.write(writeBuffer, 0, length);
 
 					onPacketSent(packet);
-				}
-			} catch (Exception exception) {
-				if (!(exception instanceof InterruptedException)) {
+				} catch (Exception exception) {
+					if (Thread.interrupted()) {
+						break;
+					}
+
 					throw exception;
 				}
 			}

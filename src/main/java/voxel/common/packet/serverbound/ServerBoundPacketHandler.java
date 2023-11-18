@@ -6,6 +6,7 @@ import voxel.common.packet.serverbound.handshake.HandshakePacket;
 import voxel.common.packet.serverbound.login.LoginAcknowledgedPacket;
 import voxel.common.packet.serverbound.login.LoginStartPacket;
 import voxel.common.packet.serverbound.other.PingPacket;
+import voxel.common.packet.serverbound.play.SetPlayerPositionAndRotationPacket;
 import voxel.common.packet.serverbound.status.StatusRequestPacket;
 
 public interface ServerBoundPacketHandler<T extends Remote> {
@@ -19,6 +20,8 @@ public interface ServerBoundPacketHandler<T extends Remote> {
 	void onLogin(T remote, LoginStartPacket packet);
 
 	void onLoginAcknowledged(T remote, LoginAcknowledgedPacket packet);
+
+	void onSetPlayerPositionAndRotation(T remote, SetPlayerPositionAndRotationPacket packet);
 
 	public static <T extends Remote> boolean dispatch(ServerBoundPacketHandler<T> handler, T remote, Packet packet) {
 		if (packet instanceof HandshakePacket packet_) {
@@ -43,6 +46,11 @@ public interface ServerBoundPacketHandler<T extends Remote> {
 
 		if (packet instanceof LoginAcknowledgedPacket packet_) {
 			handler.onLoginAcknowledged(remote, packet_);
+			return true;
+		}
+
+		if (packet instanceof SetPlayerPositionAndRotationPacket packet_) {
+			handler.onSetPlayerPositionAndRotation(remote, packet_);
 			return true;
 		}
 

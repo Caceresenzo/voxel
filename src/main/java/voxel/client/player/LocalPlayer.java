@@ -1,4 +1,4 @@
-package voxel.client;
+package voxel.client.player;
 
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_A;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_D;
@@ -17,99 +17,123 @@ import static org.lwjgl.glfw.GLFW.glfwGetKey;
 import static org.lwjgl.system.MemoryStack.stackPush;
 
 import java.nio.DoubleBuffer;
+import java.util.UUID;
 
 import org.joml.Vector2i;
-import org.joml.Vector3f;
 import org.lwjgl.system.MemoryStack;
 
-public class Player extends Camera {
-	
+import lombok.Getter;
+import voxel.client.Camera;
+import voxel.client.Settings;
+import voxel.client.game.Game;
+
+public class LocalPlayer extends Camera implements Player {
+
+	private final UUID uuid;
+	private final @Getter String login;
 	private Vector2i lastPosition;
-	
-	public Player() {
-		this(Settings.PLAYER_POSITION, -90, 0);
+
+	public LocalPlayer(UUID uuid, String login) {
+		super(Settings.PLAYER_POSITION, -90, 0);
+
+		this.uuid = uuid;
+		this.login = login;
 	}
 	
-	public Player(Vector3f position, float yaw, float pitch) {
-		super(position, yaw, pitch);
+	public boolean handleMouvement() {
+		final var moved = handleKeyboard();
+		final var rotated = handleMouse();
+		
+		return moved || rotated;
 	}
-	
+
 	@Override
 	public void update() {
 		handleKeyboard();
 		handleMouse();
 		super.update();
-		
-//		System.out.println("x=%3.2f y=%3.2f z=%3.2f yaw=%3.2f pitch=%3.2f".formatted(getPosition().x, getPosition().y, getPosition().z, getYaw(), getPitch()));
 	}
-	
-	private void handleMouse() {
+
+	private boolean handleMouse() {
+		var updated = false;
+		
 		Vector2i position;
 		try (MemoryStack stack = stackPush()) {
 			DoubleBuffer xpos = stack.mallocDouble(1);
 			DoubleBuffer ypos = stack.mallocDouble(1);
-			
-			glfwGetCursorPos(Main.window, xpos, ypos);
-			
+
+			glfwGetCursorPos(Game.window, xpos, ypos);
+
 			position = new Vector2i(
 				(int) xpos.get(0),
 				(int) ypos.get(0)
 			);
 		}
-		
+
 		if (lastPosition != null) {
 			final var delta = position.sub(lastPosition, new Vector2i());
 			if (delta.y != 0) {
 				rotatePitch(delta.y * Settings.MOUSE_SENSITIVITY);
-				// System.out.println("rotatePitch");
+				updated = true;
 			}
-			
+
 			if (delta.x != 0) {
 				rotateYaw(delta.x * Settings.MOUSE_SENSITIVITY);
-				// System.out.println("rotateYaw");
+				updated = true;
 			}
 		}
-		
+
 		lastPosition = position;
+		return updated;
 	}
-	
-	private void handleKeyboard() {
+
+	private boolean handleKeyboard() {
+		var updated = false;
+		
 		float delta = 2f;
 		float velocity = Settings.PLAYER_SPEED * delta;
-		
-		if (glfwGetKey(Main.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS || glfwGetKey(Main.window, GLFW_KEY_RIGHT_SHIFT) == GLFW_PRESS) {
+
+		if (glfwGetKey(Game.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS || glfwGetKey(Game.window, GLFW_KEY_RIGHT_SHIFT) == GLFW_PRESS) {
 			velocity *= 5;
+			updated = true;
 		}
-		
-		if (glfwGetKey(Main.window, GLFW_KEY_Z) == GLFW_PRESS || glfwGetKey(Main.window, GLFW_KEY_W) == GLFW_PRESS) {
+
+		if (glfwGetKey(Game.window, GLFW_KEY_Z) == GLFW_PRESS || glfwGetKey(Game.window, GLFW_KEY_W) == GLFW_PRESS) {
 			moveForward(velocity);
-			// System.out.println("moveForward");
+			updated = true;
 		}
-		
-		if (glfwGetKey(Main.window, GLFW_KEY_S) == GLFW_PRESS) {
+
+		if (glfwGetKey(Game.window, GLFW_KEY_S) == GLFW_PRESS) {
 			moveBackward(velocity);
-			// System.out.println("moveBackward");
+			updated = true;
 		}
-		
-		if (glfwGetKey(Main.window, GLFW_KEY_Q) == GLFW_PRESS || glfwGetKey(Main.window, GLFW_KEY_A) == GLFW_PRESS) {
+
+		if (glfwGetKey(Game.window, GLFW_KEY_Q) == GLFW_PRESS || glfwGetKey(Game.window, GLFW_KEY_A) == GLFW_PRESS) {
 			moveLeft(velocity);
-			// System.out.println("moveLeft");
+			updated = true;
 		}
-		
-		if (glfwGetKey(Main.window, GLFW_KEY_D) == GLFW_PRESS) {
+
+		if (glfwGetKey(Game.window, GLFW_KEY_D) == GLFW_PRESS) {
 			moveRight(velocity);
-			// System.out.println("moveRight");
+			updated = true;
 		}
-		
-		if (glfwGetKey(Main.window, GLFW_KEY_SPACE) == GLFW_PRESS) {
+
+		if (glfwGetKey(Game.window, GLFW_KEY_SPACE) == GLFW_PRESS) {
 			moveUp(velocity);
-			// System.out.println("moveUp");
+			updated = true;
+		}
+
+		if (glfwGetKey(Game.window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS || glfwGetKey(Game.window, GLFW_KEY_RIGHT_CONTROL) == GLFW_PRESS) {
+			moveDown(velocity);
+			updated = true;
 		}
 		
-		if (glfwGetKey(Main.window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS || glfwGetKey(Main.window, GLFW_KEY_RIGHT_CONTROL) == GLFW_PRESS) {
-			moveDown(velocity);
-			// System.out.println("moveDown");
-		}
+		return updated;
 	}
-	
+
+	@Override
+	public UUID getUUID() {
+		return uuid;
+	}
+
 }

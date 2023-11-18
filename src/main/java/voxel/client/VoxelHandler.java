@@ -5,11 +5,12 @@ import org.joml.Vector3i;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import voxel.client.player.LocalPlayer;
 
 @RequiredArgsConstructor
 public class VoxelHandler {
 
-	private final Player player;
+	private final LocalPlayer player;
 	private final World world;
 
 	private @Getter Vector3i currentVoxelPosition;

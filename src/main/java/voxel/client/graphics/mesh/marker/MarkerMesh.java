@@ -27,6 +27,10 @@ public class MarkerMesh {
 		createVertexArray();
 	}
 
+	public void move(int x, int y, int z) {
+		modelMatrix.identity().translate(x, y, z);
+	}
+	
 	public void move(Vector3i position) {
 		modelMatrix.identity().translate(position.x, position.y, position.z);
 	}

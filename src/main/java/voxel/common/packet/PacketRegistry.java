@@ -36,7 +36,6 @@ public class PacketRegistry {
 		private final Map<Class<? extends Packet>, PacketIdentifier<?>> classToIdentifier = new HashMap<>();
 
 		public void register(PacketIdentifier<?> identifier) {
-			System.out.println(identifier);
 			numberToIdentifier.put(identifier.number(), identifier);
 			classToIdentifier.put(identifier.clazz(), identifier);
 		}

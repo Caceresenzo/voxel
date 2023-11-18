@@ -5,7 +5,7 @@ import org.joml.Vector3f;
 
 public class Settings {
 	
-	public static final Vector2i WINDOW_RESOLUTION = new Vector2i(1600, 900);
+	public static final Vector2i WINDOW_RESOLUTION = new Vector2i(1200, 720);
 	
 	public static final int CHUNK_SIZE = 32;
 	public static final int CHUNK_HEIGHT = 32;
