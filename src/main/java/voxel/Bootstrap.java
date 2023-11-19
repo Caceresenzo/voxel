@@ -4,8 +4,8 @@ import java.net.BindException;
 import java.time.Duration;
 import java.util.UUID;
 
-import voxel.client.RemoteServer;
-import voxel.client.game.Game;
+import voxel.client.Game;
+import voxel.client.multiplayer.RemoteServer;
 import voxel.common.packet.ConnectionState;
 import voxel.common.packet.serverbound.handshake.HandshakePacket;
 import voxel.server.Server;

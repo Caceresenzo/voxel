@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 import org.junit.jupiter.api.Test;
 
+import opengl.util.MathUtils;
+
 class MathUtilsTest {
 
 	@Test

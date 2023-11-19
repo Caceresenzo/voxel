@@ -23,9 +23,9 @@ import org.joml.Vector2i;
 import org.lwjgl.system.MemoryStack;
 
 import lombok.Getter;
-import voxel.client.Camera;
+import voxel.client.Game;
 import voxel.client.Settings;
-import voxel.client.game.Game;
+import voxel.client.render.Camera;
 
 public class LocalPlayer extends Camera implements Player {
 

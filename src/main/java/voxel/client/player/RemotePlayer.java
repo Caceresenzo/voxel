@@ -6,10 +6,10 @@ import org.joml.Vector3f;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import voxel.client.Camera;
 import voxel.client.Settings;
-import voxel.client.graphics.mesh.marker.MarkerMesh;
-import voxel.client.graphics.mesh.marker.MarkerShaderProgram;
+import voxel.client.marker.MarkerMesh;
+import voxel.client.marker.MarkerShaderProgram;
+import voxel.client.render.Camera;
 
 @RequiredArgsConstructor
 public class RemotePlayer implements Player {
