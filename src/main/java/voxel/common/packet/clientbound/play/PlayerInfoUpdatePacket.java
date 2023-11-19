@@ -17,6 +17,7 @@ import voxel.common.packet.Packet;
 import voxel.common.packet.PacketSerializer;
 import voxel.common.packet.clientbound.play.PlayerInfoUpdatePacket.PlayerData;
 
+@SuppressWarnings("unused")
 public record PlayerInfoUpdatePacket(
 	byte actionMask,
 	List<PlayerData> players

@@ -58,13 +58,13 @@ import org.lwjgl.system.MemoryStack;
 
 import opengl.OpenGL;
 import voxel.client.state.GameState;
-import voxel.client.state.WaitingGameState;
+import voxel.client.state.NullGameState;
 
 public class Game {
 
 	public static long window;
 
-	private static GameState state = new WaitingGameState();
+	private static GameState state = new NullGameState();
 	private static GameState oldState;
 
 	public static void run() {

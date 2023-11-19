@@ -1,6 +1,6 @@
 package voxel.client.state;
 
-public class WaitingGameState implements GameState {
+public class NullGameState implements GameState {
 
 	@Override
 	public void initialize() {
