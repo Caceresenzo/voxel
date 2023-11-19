@@ -74,7 +74,12 @@ public class Game {
 		System.out.println("Hello LWJGL " + Version.getVersion() + "!");
 
 		initialize();
-		loop();
+	
+		try {
+			loop();
+		} catch (Exception exception) {
+			exception.printStackTrace();
+		}
 
 		glfwFreeCallbacks(window);
 		glfwDestroyWindow(window);

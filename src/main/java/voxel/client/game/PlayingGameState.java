@@ -1,5 +1,10 @@
 package voxel.client.game;
 
+import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_LEFT;
+import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_RIGHT;
+import static org.lwjgl.glfw.GLFW.GLFW_PRESS;
+import static org.lwjgl.glfw.GLFW.glfwSetMouseButtonCallback;
+
 import java.util.UUID;
 
 import lombok.SneakyThrows;
@@ -74,6 +79,18 @@ public class PlayingGameState implements GameState {
 
 		markerMesh = new MarkerMesh(markerShaderProgram);
 		marker = new Marker(frameTexture, markerMesh);
+
+		glfwSetMouseButtonCallback(Game.window, (window, button, action, mods) -> {
+			if (action == GLFW_PRESS) {
+				if (button == GLFW_MOUSE_BUTTON_LEFT) {
+					voxelHandler.destroy();
+				}
+
+				if (button == GLFW_MOUSE_BUTTON_RIGHT) {
+					voxelHandler.place();
+				}
+			}
+		});
 	}
 
 	@Override
@@ -113,6 +130,7 @@ public class PlayingGameState implements GameState {
 
 	@Override
 	public void cleanup() {
+		glfwSetMouseButtonCallback(Game.window, null);
 	}
 
 }
