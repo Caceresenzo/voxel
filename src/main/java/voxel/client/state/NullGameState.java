@@ -1,6 +1,8 @@
 package voxel.client.state;
 
-public class NullGameState implements GameState {
+public enum NullGameState implements GameState {
+	
+	INSTANCE;
 
 	@Override
 	public void initialize() {

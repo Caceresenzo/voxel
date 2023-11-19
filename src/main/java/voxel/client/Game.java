@@ -64,7 +64,7 @@ public class Game {
 
 	public static long window;
 
-	private static GameState state = new NullGameState();
+	private static GameState state = NullGameState.INSTANCE;
 	private static GameState oldState;
 
 	public static void run() {
