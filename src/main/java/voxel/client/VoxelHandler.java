@@ -105,10 +105,10 @@ public class VoxelHandler {
 	}
 
 	public void update() {
-//		if (rayCast()) {
-//			System.out.printf("%s %n", voxelLocalPosition.toString(NumberFormat.getIntegerInstance()));
-//		}
-//		System.out.println("----------");
+		//		if (rayCast()) {
+		//			System.out.printf("%s %n", voxelLocalPosition.toString(NumberFormat.getIntegerInstance()));
+		//		}
+		//		System.out.println("----------");
 	}
 
 	public boolean rayCast() {
@@ -144,12 +144,12 @@ public class VoxelHandler {
 			? deltaZ * (1.0 - fract(start.z))
 			: deltaZ * fract(start.z);
 
-//		System.out.printf("directionX=%f deltaX=%f maxX=%f %n", directionX, deltaX, maxX);
-//		System.out.printf("directionY=%f deltaY=%f maxY=%f %n", directionY, deltaY, maxY);
-//		System.out.printf("directionZ=%f deltaZ=%f maxZ=%f %n", directionZ, deltaZ, maxZ);
+		//		System.out.printf("directionX=%f deltaX=%f maxX=%f %n", directionX, deltaX, maxX);
+		//		System.out.printf("directionY=%f deltaY=%f maxY=%f %n", directionY, deltaY, maxY);
+		//		System.out.printf("directionZ=%f deltaZ=%f maxZ=%f %n", directionZ, deltaZ, maxZ);
 
 		while (!(maxX > 1.0 && maxY > 1.0 && maxZ > 1.0)) {
-//			System.out.printf("--%ncurrentVoxelPosition=%s %n", currentVoxelPosition.toString(NumberFormat.getIntegerInstance()));
+			//			System.out.printf("--%ncurrentVoxelPosition=%s %n", currentVoxelPosition.toString(NumberFormat.getIntegerInstance()));
 			if (getVoxelId(currentVoxelPosition) && voxelId != 0) {
 				this.voxelWorldPosition = currentVoxelPosition;
 
@@ -191,9 +191,13 @@ public class VoxelHandler {
 	}
 
 	public boolean getVoxelId(Vector3i position) {
-//		System.out.printf("position=%s %n", position.toString(NumberFormat.getIntegerInstance()));
+		if (position.x < 0 || position.y < 0 || position.z < 0) {
+			return false;
+		}
+
+		//		System.out.printf("position=%s %n", position.toString(NumberFormat.getIntegerInstance()));
 		final var chunkPosition = new Vector3i(position).div(Settings.CHUNK_SIZE);
-//		System.out.printf("chunkPosition=%s %n", chunkPosition.toString(NumberFormat.getIntegerInstance()));
+		//		System.out.printf("chunkPosition=%s %n", chunkPosition.toString(NumberFormat.getIntegerInstance()));
 
 		if (
 			(0 <= chunkPosition.x && chunkPosition.x < Settings.WORLD_WIDTH) &&
@@ -204,9 +208,10 @@ public class VoxelHandler {
 			final var chunk = world.getChunks()[chunkIndex];
 
 			final var localPosition = new Vector3i(position).sub(new Vector3i(chunkPosition).mul(Settings.CHUNK_SIZE));
-//			System.out.printf("localPosition=%s %n", localPosition.toString(NumberFormat.getIntegerInstance()));
+
+			//			System.out.printf("localPosition=%s %n", localPosition.toString(NumberFormat.getIntegerInstance()));
 			final var voxelIndex = Chunk.toVoxelIndex(localPosition);
-//			System.out.printf("voxelIndex=%s %n", voxelIndex);
+			//			System.out.printf("voxelIndex=%s %n", voxelIndex);
 			final var voxelId = chunk.getVoxels()[voxelIndex];
 
 			this.voxelId = voxelId;
