@@ -24,6 +24,7 @@ import opengl.shader.variable.uniform.BooleanUniform;
 import opengl.shader.variable.uniform.FloatUniform;
 import opengl.shader.variable.uniform.Matrix4fUniform;
 import opengl.shader.variable.uniform.SamplerUniform;
+import opengl.shader.variable.uniform.Vector3fUniform;
 import opengl.vertex.VertexArray;
 
 public class ShaderProgram {
@@ -88,6 +89,10 @@ public class ShaderProgram {
 
 	protected Matrix4fUniform createMatrix4fUniform(String name) {
 		return new Matrix4fUniform(this, name);
+	}
+	
+	protected Vector3fUniform createVector3fUniform(String name) {
+		return new Vector3fUniform(this, name);
 	}
 
 	protected SamplerUniform createSamplerUniform(String name) {

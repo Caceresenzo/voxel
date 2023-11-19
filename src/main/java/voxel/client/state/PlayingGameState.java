@@ -21,6 +21,9 @@ import voxel.client.marker.MarkerMesh;
 import voxel.client.marker.MarkerShaderProgram;
 import voxel.client.multiplayer.RemoteServer;
 import voxel.client.player.LocalPlayer;
+import voxel.client.skybox.SkyBox;
+import voxel.client.skybox.SkyBoxMesh;
+import voxel.client.skybox.SkyBoxShaderProgram;
 import voxel.common.packet.serverbound.play.SetPlayerPositionAndRotationPacket;
 
 public class PlayingGameState implements GameState {
@@ -37,6 +40,10 @@ public class PlayingGameState implements GameState {
 	private MarkerShaderProgram markerShaderProgram;
 	private MarkerMesh markerMesh;
 	private Marker marker;
+
+	private SkyBoxShaderProgram skyBoxShaderProgram;
+	private SkyBoxMesh skyBoxMesh;
+	private SkyBox skyBox;
 
 	public PlayingGameState(UUID uuid, String login, RemoteServer server) {
 		this.player = new LocalPlayer(uuid, login);
@@ -81,6 +88,13 @@ public class PlayingGameState implements GameState {
 		markerMesh = new MarkerMesh(markerShaderProgram);
 		marker = new Marker(frameTexture, markerMesh);
 
+		skyBoxShaderProgram = SkyBoxShaderProgram.create();
+		skyBoxShaderProgram.use();
+		skyBoxShaderProgram.projection.load(player.getProjection());
+		
+		skyBoxMesh = new SkyBoxMesh(skyBoxShaderProgram);
+		skyBox = new SkyBox(skyBoxMesh);
+
 		glfwSetMouseButtonCallback(Game.window, (window, button, action, mods) -> {
 			if (action == GLFW_PRESS) {
 				if (button == GLFW_MOUSE_BUTTON_LEFT) {
@@ -120,6 +134,7 @@ public class PlayingGameState implements GameState {
 		world.render(player);
 
 		marker.render(player, voxelHandler);
+		skyBox.render(player, System.currentTimeMillis());
 
 		texture.activate(0);
 		for (final var otherPlayer : server.getOtherPlayers()) {

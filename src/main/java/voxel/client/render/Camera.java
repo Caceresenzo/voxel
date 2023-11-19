@@ -1,5 +1,6 @@
 package voxel.client.render;
 
+import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
@@ -31,6 +32,10 @@ public class Camera {
 		this.view = new Matrix4f();
 		
 		this.frustum = new Frustum(this);
+	}
+	
+	public Matrix4f getViewWithoutTranslation() {
+		return new Matrix4f(new Matrix3f(view));
 	}
 	
 	public void update() {

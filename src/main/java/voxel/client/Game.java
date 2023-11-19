@@ -71,7 +71,7 @@ public class Game {
 		System.out.println("Hello LWJGL " + Version.getVersion() + "!");
 
 		initialize();
-	
+
 		try {
 			loop();
 		} catch (Exception exception) {
@@ -134,14 +134,14 @@ public class Game {
 
 	private static void loop() {
 		GL.createCapabilities();
-//		GLUtil.setupDebugMessageCallback(System.err);
+		//		GLUtil.setupDebugMessageCallback(System.err);
 
 		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_BLEND);
-//		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		//		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 		var previousTime = glfwGetTime();
 		var frameCount = 0;

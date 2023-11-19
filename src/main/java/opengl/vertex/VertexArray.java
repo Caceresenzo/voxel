@@ -21,7 +21,7 @@ public class VertexArray {
 	private final ShaderProgram shaderProgram;
 	private final List<VertexBuffer> buffers;
 	private final Cleanable cleanable;
-	private int verticesCount;
+	private @Getter int verticesCount;
 
 	public VertexArray(ShaderProgram shaderProgram) {
 		this.id = glGenVertexArrays();
@@ -54,6 +54,7 @@ public class VertexArray {
 
 		{
 			final var stride = Attribute.sumStride(attributes);
+
 			if (buffer.getSizeInBytes() % stride != 0) {
 				throw new IllegalArgumentException("invalid stride of %s for buffer size (in bytes) of %s".formatted(stride, buffer.getSizeInBytes()));
 			}
