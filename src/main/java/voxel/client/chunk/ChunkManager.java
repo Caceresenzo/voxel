@@ -1,11 +1,14 @@
 package voxel.client.chunk;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import voxel.client.world.World;
 import voxel.shared.chunk.ChunkKey;
+import voxel.shared.chunk.Face;
 
 public class ChunkManager {
 
@@ -33,6 +36,19 @@ public class ChunkManager {
 		storage.put(key, chunk);
 
 		return chunk;
+	}
+
+	List<Chunk> getNeighborToInvalidate(ChunkKey chunkKey) {
+		final var chunks = new ArrayList<Chunk>(6);
+
+		chunks.add(get(chunkKey.at(Face.UP)));
+		chunks.add(get(chunkKey.at(Face.DOWN)));
+		chunks.add(get(chunkKey.at(Face.EAST)));
+		chunks.add(get(chunkKey.at(Face.WEST)));
+		chunks.add(get(chunkKey.at(Face.NORTH)));
+		chunks.add(get(chunkKey.at(Face.SOUTH)));
+
+		return chunks;
 	}
 
 	public Collection<Chunk> getAll() {

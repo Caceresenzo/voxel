@@ -114,24 +114,16 @@ public class RemoteClient extends Remote implements ServerBoundPacketHandler<Rem
 		for (final var chunk : server.getWorld().getChunkManager().getAll()) {
 			final var voxelIds = new byte[Chunk.VOLUME];
 
-			for (final var section : chunk.getSections()) {
-				for (var y = 0; y < Chunk.SECTION_DEPTH; y++) {
-					for (var z = 0; z < Chunk.HEIGHT; z++) {
-						for (var x = 0; x < Chunk.WIDTH; x++) {
-							final var index = voxel.client.chunk.Chunk.index(
-								x,
-								y + (section.getY() * Chunk.SECTION_DEPTH),
-								z
-							);
-
-							//							System.out.printf("section.y%d index=%d %n", section.getY(), index);
-							voxelIds[index] = section.getType(x, y, z);
-						}
+			for (var y = 0; y < Chunk.DEPTH; y++) {
+				for (var z = 0; z < Chunk.HEIGHT; z++) {
+					for (var x = 0; x < Chunk.WIDTH; x++) {
+						final var index = Chunk.index(x, y, z);
+						voxelIds[index] = chunk.getVoxel(x, y, z);
 					}
 				}
 			}
 
-			remote.offer(new ChunkDataPacket(chunk.getX(), chunk.getZ(), voxelIds));
+			remote.offer(new ChunkDataPacket(chunk.getPosition(), voxelIds));
 		}
 	}
 

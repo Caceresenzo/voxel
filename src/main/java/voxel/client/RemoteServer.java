@@ -11,7 +11,6 @@ import lombok.Getter;
 import voxel.client.player.LocalPlayer;
 import voxel.client.player.RemotePlayer;
 import voxel.client.state.PlayingGameState;
-import voxel.client.world.World;
 import voxel.networking.Remote;
 import voxel.networking.packet.ConnectionState;
 import voxel.networking.packet.Packet;
@@ -96,11 +95,9 @@ public class RemoteServer extends Remote implements ClientBoundPacketHandler<Rem
 
 	@Override
 	public void onChunkData(RemoteServer remote, ChunkDataPacket packet) {
-		final var key = ChunkKey.of(packet.chunkX(), packet.chunkZ());
+		final var key = new ChunkKey(packet.x(), packet.y(), packet.z());
 		final var chunk = player.getWorld().getChunkManager().load(key);
 		chunk.setVoxels(packet.voxelIds());
-		
-		System.out.println(key);
 	}
 
 	@Override

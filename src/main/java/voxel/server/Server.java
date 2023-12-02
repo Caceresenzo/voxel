@@ -31,7 +31,7 @@ public class Server {
 	}
 
 	public void start(ConnectionAcceptor networkServer) {
-		world.loadSpawnChunks();
+		world.loadSpawnChunks(3);
 
 		this.networkServer = networkServer;
 		this.networkServer.start(this);

@@ -2,8 +2,9 @@ package voxel.client.chunk;
 
 import java.util.Arrays;
 
-import org.joml.Vector2f;
+import org.joml.Vector3f;
 import org.joml.Vector3i;
+import org.joml.Vector3ic;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -19,11 +20,9 @@ public class Chunk implements ChunkConstants {
 	private final World world;
 
 	@Getter
-	private final int x;
+	private final Vector3ic position;
 
 	@Getter
-	private final int z;
-
 	private final ChunkShaderProgram shaderProgram;
 
 	@Getter(AccessLevel.PACKAGE)
@@ -33,18 +32,17 @@ public class Chunk implements ChunkConstants {
 	private boolean isEmpty;
 
 	@Getter
-	private final Vector2f center;
+	private final Vector3f center;
 
 	public Chunk(World world, ChunkKey key, ChunkShaderProgram shaderProgram) {
 		this.world = world;
-		this.x = key.x();
-		this.z = key.z();
+		this.position = new Vector3i(key.x(), key.y(), key.z());
 		this.shaderProgram = shaderProgram;
 
-		this.voxels = new byte[Settings.CHUNK_VOLUME];
+		this.voxels = new byte[VOLUME];
 		this.isEmpty = true;
 
-		this.center = new Vector2f(x, z).add(new Vector2f(0.5f)).mul(Settings.CHUNK_SIZE);
+		this.center = new Vector3f(position).add(new Vector3f(0.5f)).mul(Settings.CHUNK_SIZE);
 	}
 
 	public void fill(byte voxelId) {
@@ -54,7 +52,13 @@ public class Chunk implements ChunkConstants {
 	}
 
 	public void buildMesh() {
-		mesh = new ChunkMesh(this, shaderProgram);
+		final var newMesh = new ChunkMeshBuilder(this).build();
+
+		if (this.mesh != null) {
+			this.mesh.delete();
+		}
+
+		this.mesh = newMesh;
 	}
 
 	public void render(Camera camera) {
@@ -78,27 +82,40 @@ public class Chunk implements ChunkConstants {
 		}
 	}
 
-	public int getWorldX() {
-		return x * WIDTH;
-	}
-
-	public int getWorldZ() {
-		return z * HEIGHT;
+	public Vector3i getWorldPosition() {
+		return new Vector3i(
+			position.x() * WIDTH,
+			position.y() * DEPTH,
+			position.z() * HEIGHT
+		);
 	}
 
 	public void setVoxels(byte[] voxels) {
 		System.arraycopy(voxels, 0, this.voxels, 0, this.voxels.length);
 
+		deleteMesh();
+		testIfEmpty();
+
+		//		for (final var chunk : world.getChunkManager().getNeighborToInvalidate(asKey())) {
+		//			if (chunk != null) {
+		//				chunk.deleteMesh();
+		//			}
+		//		}
+	}
+
+	public void deleteMesh() {
 		if (mesh != null) {
 			mesh.delete();
 			mesh = null;
 		}
-
-		testIfEmpty();
 	}
 
 	public byte getVoxelId(int x, int y, int z) {
 		return voxels[index(x, y, z)];
+	}
+
+	public ChunkKey asKey() {
+		return new ChunkKey(position.x(), position.y(), position.z());
 	}
 
 	public static int index(Vector3i position) {

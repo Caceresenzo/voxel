@@ -7,7 +7,6 @@ import java.util.concurrent.ConcurrentMap;
 import voxel.server.chunk.generator.ChunkGenerator;
 import voxel.server.world.World;
 import voxel.shared.chunk.ChunkKey;
-import voxel.shared.chunk.ChunkSection;
 
 public class ChunkManager {
 
@@ -41,14 +40,11 @@ public class ChunkManager {
 	}
 
 	private void generate(Chunk chunk) {
-		final var sections = new ChunkSection[Chunk.SECTION_COUNT];
-		for (int index = 0; index < sections.length; index++) {
-			sections[index] = new ChunkSection(index);
-		}
+		final var voxels = new byte[Chunk.VOLUME];
 
-		generator.generate(world, chunk.getX(), chunk.getZ(), sections);
+		generator.generate(chunk.getWorld(), chunk.getPosition(), voxels);
 
-		chunk.setSections(sections);
+		chunk.setVoxels(voxels);
 	}
 
 	public Collection<Chunk> getAll() {

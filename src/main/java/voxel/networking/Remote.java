@@ -20,7 +20,7 @@ import voxel.util.data.ArrayBufferWriter;
 public abstract class Remote {
 
 	public static final int MAX_PACKET_SIZE = 1024 * 32;
-	public static final int MAX_PACKET_QUEUE_SIZE = 1024;
+	public static final int MAX_PACKET_QUEUE_SIZE = 1024 * 8;
 
 	private final Socket socket;
 	protected ConnectionState state = ConnectionState.HANDSHAKE;
@@ -61,8 +61,15 @@ public abstract class Remote {
 		writeThread.interrupt();
 	}
 
-	public void offer(Packet packet) {
-		writeQueue.offer(packet);
+	public boolean offer(Packet packet) {
+		final var sizeBefore = writeQueue.size();
+
+		if (writeQueue.offer(packet)) {
+			return true;
+		}
+
+		System.err.printf("packet discarded (size=%d): %s", sizeBefore, packet);
+		return false;
 	}
 
 	public abstract void onPacketReceived(Packet packet);
