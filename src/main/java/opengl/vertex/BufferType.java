@@ -3,19 +3,17 @@ package opengl.vertex;
 import static org.lwjgl.opengl.GL15.GL_ARRAY_BUFFER;
 import static org.lwjgl.opengl.GL15.GL_ELEMENT_ARRAY_BUFFER;
 
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.experimental.Accessors;
+import opengl.OpenGLConstant;
 
-@Getter(AccessLevel.PROTECTED)
-@Accessors(fluent = true)
+@Getter
 @RequiredArgsConstructor
-public enum BufferType {
-	
+public enum BufferType implements OpenGLConstant {
+
 	ARRAY(GL_ARRAY_BUFFER),
 	ELEMENT_ARRAY(GL_ELEMENT_ARRAY_BUFFER);
-	
+
 	private final int value;
-	
+
 }

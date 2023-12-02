@@ -14,9 +14,6 @@ import opengl.OpenGL;
 
 public class VertexBuffer {
 
-	static int[] buffers;
-	static int bufferIndex = 0;
-
 	private final @Getter int id;
 	private final @Getter BufferType type;
 	private final @Getter UsageType usage;
@@ -36,20 +33,20 @@ public class VertexBuffer {
 	}
 
 	public VertexBuffer bind() {
-		glBindBuffer(type.value(), id);
+		glBindBuffer(type.getValue(), id);
 		return this;
 	}
 
 	public VertexBuffer store(float[] data) {
 		bind();
-		glBufferData(type.value(), data, usage.value());
+		glBufferData(type.getValue(), data, usage.getValue());
 		sizeInBytes = data.length * Float.BYTES;
 		return this;
 	}
 
 	public VertexBuffer store(int[] data) {
 		bind();
-		glBufferData(type.value(), data, usage.value());
+		glBufferData(type.getValue(), data, usage.getValue());
 		sizeInBytes = data.length * Integer.BYTES;
 		return this;
 	}
@@ -61,7 +58,7 @@ public class VertexBuffer {
 		final var buffer = MemoryUtil.memAlloc(data.length);
 		buffer.put(data).flip();
 
-		glBufferData(type.value(), buffer, usage.value());
+		glBufferData(type.getValue(), buffer, usage.getValue());
 		sizeInBytes = data.length;
 
 		MemoryUtil.memFree(buffer);
@@ -69,7 +66,7 @@ public class VertexBuffer {
 	}
 
 	public VertexBuffer unbind() {
-		glBindBuffer(type.value(), 0);
+		glBindBuffer(type.getValue(), 0);
 		return this;
 	}
 

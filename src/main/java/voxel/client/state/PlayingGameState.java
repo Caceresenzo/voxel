@@ -13,6 +13,9 @@ import opengl.texture.Texture;
 import voxel.client.Game;
 import voxel.client.RemoteServer;
 import voxel.client.chunk.ChunkShaderProgram;
+import voxel.client.crosshair.CrossHair;
+import voxel.client.crosshair.CrossHairMesh;
+import voxel.client.crosshair.CrossHairShaderProgram;
 import voxel.client.marker.Marker;
 import voxel.client.marker.MarkerMesh;
 import voxel.client.marker.MarkerShaderProgram;
@@ -42,6 +45,10 @@ public class PlayingGameState implements GameState {
 	private SkyBoxShaderProgram skyBoxShaderProgram;
 	private SkyBoxMesh skyBoxMesh;
 	private SkyBox skyBox;
+
+	private CrossHairShaderProgram crossHairShaderProgram;
+	private CrossHairMesh crossHairMesh;
+	private CrossHair crossHair;
 
 	public PlayingGameState(LocalPlayer player, RemoteServer server) {
 		this.player = player;
@@ -93,6 +100,10 @@ public class PlayingGameState implements GameState {
 
 		skyBoxMesh = new SkyBoxMesh(skyBoxShaderProgram);
 		skyBox = new SkyBox(skyBoxMesh);
+
+		crossHairShaderProgram = CrossHairShaderProgram.create();
+		crossHairMesh = new CrossHairMesh(crossHairShaderProgram);
+		crossHair = new CrossHair(crossHairMesh);
 
 		//		glfwSetMouseButtonCallback(Game.window, (window, button, action, mods) -> {
 		//			if (action == GLFW_PRESS) {
@@ -153,12 +164,14 @@ public class PlayingGameState implements GameState {
 		}
 
 		//		marker.render(player, voxelHandler);
-		skyBox.render(player, System.currentTimeMillis());
 
 		texture.activate(0);
 		for (final var otherPlayer : server.getOtherPlayers()) {
 			otherPlayer.render(markerShaderProgram, player);
 		}
+
+		crossHair.render();
+		skyBox.render(player, System.currentTimeMillis());
 
 		OpenGL.checkErrors();
 	}

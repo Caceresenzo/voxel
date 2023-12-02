@@ -1,6 +1,5 @@
 package opengl.vertex;
 
-import static org.lwjgl.opengl.GL11.GL_TRIANGLES;
 import static org.lwjgl.opengl.GL11.glDrawArrays;
 import static org.lwjgl.opengl.GL30.glBindVertexArray;
 import static org.lwjgl.opengl.GL30.glDeleteVertexArrays;
@@ -12,6 +11,7 @@ import java.util.List;
 
 import lombok.Getter;
 import opengl.OpenGL;
+import opengl.draw.BeginMode;
 import opengl.shader.ShaderProgram;
 import opengl.shader.variable.attribute.Attribute;
 
@@ -19,15 +19,21 @@ public class VertexArray {
 
 	private final @Getter int id;
 	private final ShaderProgram shaderProgram;
+	private final @Getter BeginMode beginMode;
 	private final List<VertexBuffer> buffers;
 	private final Cleanable cleanable;
 	private @Getter int verticesCount;
 
 	public VertexArray(ShaderProgram shaderProgram) {
+		this(shaderProgram, BeginMode.TRIANGLES);
+	}
+
+	public VertexArray(ShaderProgram shaderProgram, BeginMode beginMode) {
 		this.id = glGenVertexArrays();
 		OpenGL.checkErrors();
 
 		this.shaderProgram = shaderProgram;
+		this.beginMode = beginMode;
 		this.buffers = new ArrayList<>();
 
 		this.cleanable = OpenGL.registerForGarbageCollect(this, new DeleteAction(id));
@@ -80,7 +86,7 @@ public class VertexArray {
 		shaderProgram.use();
 		bind();
 
-		glDrawArrays(GL_TRIANGLES, 0, verticesCount);
+		glDrawArrays(beginMode.getValue(), 0, verticesCount);
 
 		unbind();
 		shaderProgram.unuse();
