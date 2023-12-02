@@ -21,7 +21,7 @@ public class SkyBoxShaderProgram extends ShaderProgram {
 		this.projection = createMatrix4fUniform("m_projection");
 		this.view = createMatrix4fUniform("m_view");
 		this.color = createVector3fUniform("color");
-		this.position = createFloatAttribute("in_position", 3, false);
+		this.position = createFloatAttribute("in_position", 3);
 	}
 
 	public static SkyBoxShaderProgram create() throws IOException {

@@ -55,6 +55,10 @@ public class ShaderProgram {
 		cleanable.clean();
 	}
 
+	protected FloatAttribute createFloatAttribute(String name, int size) {
+		return createFloatAttribute(name, size, false);
+	}
+
 	protected FloatAttribute createFloatAttribute(String name, int size, boolean normalized) {
 		final var attribute = FloatAttribute.ofFloat(this, name, size, normalized);
 
@@ -90,7 +94,7 @@ public class ShaderProgram {
 	protected Matrix4fUniform createMatrix4fUniform(String name) {
 		return new Matrix4fUniform(this, name);
 	}
-	
+
 	protected Vector3fUniform createVector3fUniform(String name) {
 		return new Vector3fUniform(this, name);
 	}

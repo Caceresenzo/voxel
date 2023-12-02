@@ -13,7 +13,7 @@ public class CrossHairShaderProgram extends ShaderProgram {
 	public CrossHairShaderProgram(Shader vertexShader, Shader fragmentShader) {
 		super(vertexShader, fragmentShader);
 
-		this.position = createFloatAttribute("aPos", 2, false);
+		this.position = createFloatAttribute("aPos", 2);
 	}
 
 	public static CrossHairShaderProgram create() throws IOException {

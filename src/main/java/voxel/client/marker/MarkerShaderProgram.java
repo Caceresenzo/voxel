@@ -24,8 +24,8 @@ public class MarkerShaderProgram extends ShaderProgram {
 		this.model = createMatrix4fUniform("m_model");
 		this.view = createMatrix4fUniform("m_view");
 		this.texture = createSamplerUniform("u_texture");
-		this.textureCoordinate = createFloatAttribute("in_tex_coord", 2, false);
-		this.position = createFloatAttribute("in_position", 3, false);
+		this.textureCoordinate = createFloatAttribute("in_tex_coord", 2);
+		this.position = createFloatAttribute("in_position", 3);
 	}
 
 	public static MarkerShaderProgram create() throws IOException {
