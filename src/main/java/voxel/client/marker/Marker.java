@@ -2,7 +2,7 @@ package voxel.client.marker;
 
 import lombok.RequiredArgsConstructor;
 import opengl.texture.Texture;
-import voxel.client.level.VoxelHandler;
+import voxel.client.VoxelHandler;
 import voxel.client.render.Camera;
 
 @RequiredArgsConstructor

@@ -193,4 +193,8 @@ public class Game {
 		}
 	}
 
+	public static GameState getState() {
+		return state;
+	}
+
 }

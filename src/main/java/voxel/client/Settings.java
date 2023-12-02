@@ -9,11 +9,11 @@ public class Settings {
 
 	public static final Vector2i WINDOW_RESOLUTION = new Vector2i(1200, 720);
 
-	public static final int CHUNK_SIZE = 32;
-	public static final int CHUNK_HEIGHT = 32;
+	public static final int CHUNK_SIZE = 16;
+	public static final int CHUNK_HEIGHT = 64;
 	public static final int HALF_CHUNK_SIZE = CHUNK_SIZE / 2;
 	public static final int CHUNK_AREA = CHUNK_SIZE * CHUNK_SIZE;
-	public static final int CHUNK_VOLUME = CHUNK_AREA * CHUNK_HEIGHT;
+	public static final int CHUNK_VOLUME = CHUNK_AREA * 64;
 	public static final double CHUNK_SPHERE_RADIUS = HALF_CHUNK_SIZE * Math.sqrt(3);
 
 	public static final int WORLD_WIDTH = 5;

@@ -26,11 +26,13 @@ import lombok.Getter;
 import voxel.client.Game;
 import voxel.client.Settings;
 import voxel.client.render.Camera;
+import voxel.client.world.World;
 
 public class LocalPlayer extends Camera implements Player {
 
 	private final UUID uuid;
 	private final @Getter String login;
+	private @Getter World world;
 	private Vector2i lastPosition;
 
 	public LocalPlayer(UUID uuid, String login) {
@@ -39,11 +41,11 @@ public class LocalPlayer extends Camera implements Player {
 		this.uuid = uuid;
 		this.login = login;
 	}
-	
+
 	public boolean handleMouvement() {
 		final var moved = handleKeyboard();
 		final var rotated = handleMouse();
-		
+
 		return moved || rotated;
 	}
 
@@ -56,7 +58,7 @@ public class LocalPlayer extends Camera implements Player {
 
 	private boolean handleMouse() {
 		var updated = false;
-		
+
 		Vector2i position;
 		try (MemoryStack stack = stackPush()) {
 			DoubleBuffer xpos = stack.mallocDouble(1);
@@ -89,7 +91,7 @@ public class LocalPlayer extends Camera implements Player {
 
 	private boolean handleKeyboard() {
 		var updated = false;
-		
+
 		float delta = 2f;
 		float velocity = Settings.PLAYER_SPEED * delta;
 
@@ -127,13 +129,17 @@ public class LocalPlayer extends Camera implements Player {
 			moveDown(velocity);
 			updated = true;
 		}
-		
+
 		return updated;
 	}
 
 	@Override
 	public UUID getUUID() {
 		return uuid;
+	}
+
+	public void setWorld(World world) {
+		this.world = world;
 	}
 
 }

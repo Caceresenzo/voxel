@@ -1,41 +1,39 @@
 package voxel.client.state;
 
-import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_LEFT;
-import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_RIGHT;
-import static org.lwjgl.glfw.GLFW.GLFW_PRESS;
 import static org.lwjgl.glfw.GLFW.glfwSetMouseButtonCallback;
 
-import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
 
+import lombok.Getter;
 import lombok.SneakyThrows;
 import opengl.OpenGL;
 import opengl.texture.Atlas;
 import opengl.texture.ImageData;
 import opengl.texture.Texture;
 import voxel.client.Game;
-import voxel.client.level.VoxelHandler;
-import voxel.client.level.World;
-import voxel.client.level.chunk.ChunkShaderProgram;
+import voxel.client.RemoteServer;
+import voxel.client.chunk.ChunkShaderProgram;
 import voxel.client.marker.Marker;
 import voxel.client.marker.MarkerMesh;
 import voxel.client.marker.MarkerShaderProgram;
-import voxel.client.multiplayer.RemoteServer;
 import voxel.client.player.LocalPlayer;
 import voxel.client.skybox.SkyBox;
 import voxel.client.skybox.SkyBoxMesh;
 import voxel.client.skybox.SkyBoxShaderProgram;
-import voxel.common.packet.serverbound.play.SetPlayerPositionAndRotationPacket;
+import voxel.client.world.World;
+import voxel.networking.packet.serverbound.play.SetPlayerPositionAndRotationPacket;
 
 public class PlayingGameState implements GameState {
 
+	private final CountDownLatch initializeLatch = new CountDownLatch(1);
 	private LocalPlayer player;
 	private RemoteServer server;
 	private ChunkShaderProgram chunkShaderProgram;
-	private World world;
+	private @Getter World world;
 	private Texture frameTexture;
 	private Texture texture;
 	private Atlas atlas;
-	private VoxelHandler voxelHandler;
+	//	private VoxelHandler voxelHandler;
 
 	private MarkerShaderProgram markerShaderProgram;
 	private MarkerMesh markerMesh;
@@ -45,8 +43,8 @@ public class PlayingGameState implements GameState {
 	private SkyBoxMesh skyBoxMesh;
 	private SkyBox skyBox;
 
-	public PlayingGameState(UUID uuid, String login, RemoteServer server) {
-		this.player = new LocalPlayer(uuid, login);
+	public PlayingGameState(LocalPlayer player, RemoteServer server) {
+		this.player = player;
 		this.server = server;
 	}
 
@@ -58,7 +56,8 @@ public class PlayingGameState implements GameState {
 		chunkShaderProgram.use();
 		chunkShaderProgram.atlas.load(0);
 
-		world = new World(chunkShaderProgram);
+		//		System.out.println("set world");
+		//		world = new World(chunkShaderProgram);
 
 		player.update();
 
@@ -78,7 +77,7 @@ public class PlayingGameState implements GameState {
 			8
 		);
 
-		voxelHandler = new VoxelHandler(player, world);
+		//		voxelHandler = new VoxelHandler(player, world);
 
 		markerShaderProgram = MarkerShaderProgram.create();
 
@@ -91,21 +90,38 @@ public class PlayingGameState implements GameState {
 		skyBoxShaderProgram = SkyBoxShaderProgram.create();
 		skyBoxShaderProgram.use();
 		skyBoxShaderProgram.projection.load(player.getProjection());
-		
+
 		skyBoxMesh = new SkyBoxMesh(skyBoxShaderProgram);
 		skyBox = new SkyBox(skyBoxMesh);
 
-		glfwSetMouseButtonCallback(Game.window, (window, button, action, mods) -> {
-			if (action == GLFW_PRESS) {
-				if (button == GLFW_MOUSE_BUTTON_LEFT) {
-					voxelHandler.destroy();
-				}
+		//		glfwSetMouseButtonCallback(Game.window, (window, button, action, mods) -> {
+		//			if (action == GLFW_PRESS) {
+		//				if (button == GLFW_MOUSE_BUTTON_LEFT) {
+		//					voxelHandler.destroy();
+		//				}
+		//
+		//				if (button == GLFW_MOUSE_BUTTON_RIGHT) {
+		//					voxelHandler.place();
+		//				}
+		//			}
+		//		});
 
-				if (button == GLFW_MOUSE_BUTTON_RIGHT) {
-					voxelHandler.place();
-				}
-			}
-		});
+		//		world.getChunkManager().load(ChunkKey.of(0, 0)).fill((byte) 1);
+		//		world.getChunkManager().load(ChunkKey.of(1, 0)).fill((byte) 2);
+		//		world.getChunkManager().load(ChunkKey.of(1, 1)).fill((byte) 3);
+		//		world.getChunkManager().load(ChunkKey.of(0, 1)).fill((byte) 4);
+
+		initializeLatch.countDown();
+	}
+
+	@SneakyThrows
+	public void awaitInitialize() {
+		initializeLatch.await();
+	}
+
+	public World setWorld(String name) {
+		this.world = new World(name, chunkShaderProgram);
+		return world;
 	}
 
 	@Override
@@ -123,7 +139,7 @@ public class PlayingGameState implements GameState {
 		}
 
 		player.update();
-		voxelHandler.update();
+		//		voxelHandler.update();
 	}
 
 	@Override
@@ -131,9 +147,12 @@ public class PlayingGameState implements GameState {
 		atlas.activate(0);
 		chunkShaderProgram.use();
 		chunkShaderProgram.view.load(player.getView());
-		world.render(player);
 
-		marker.render(player, voxelHandler);
+		if (world != null) {
+			world.render(player);
+		}
+
+		//		marker.render(player, voxelHandler);
 		skyBox.render(player, System.currentTimeMillis());
 
 		texture.activate(0);

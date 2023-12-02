@@ -3,7 +3,7 @@ package voxel.client.render;
 import org.joml.Vector3f;
 
 import voxel.client.Settings;
-import voxel.client.level.chunk.Chunk;
+import voxel.client.chunk.Chunk;
 
 public class Frustum {
 
@@ -26,26 +26,27 @@ public class Frustum {
 	}
 
 	public boolean contains(Chunk chunk) {
-		var sphereVector = new Vector3f(chunk.getCenter()).sub(camera.getPosition());
-		
-		var sphereZ = sphereVector.dot(camera.getForward());
-		if (!(Settings.NEAR - Settings.CHUNK_SPHERE_RADIUS <= sphereZ && sphereZ <= Settings.FAR + Settings.CHUNK_SPHERE_RADIUS)) {
-			return false;
-		}
-		
-		var sphereY = sphereVector.dot(camera.getUp());
-		var distanceY = factorY * Settings.CHUNK_SPHERE_RADIUS + sphereZ * tanY;
-		if (!(-distanceY <= sphereY && sphereY <= distanceY)) {
-			return false;
-		}
-		
-		var sphereX = sphereVector.dot(camera.getRight());
-		var distanceX = factorX * Settings.CHUNK_SPHERE_RADIUS + sphereZ * tanX;
-		if (!(-distanceX <= sphereY && sphereX <= distanceX)) {
-			return false;
-		}
-		
 		return true;
+//		var sphereVector = new Vector3f(chunk.getCenter()).sub(camera.getPosition());
+//		
+//		var sphereZ = sphereVector.dot(camera.getForward());
+//		if (!(Settings.NEAR - Settings.CHUNK_SPHERE_RADIUS <= sphereZ && sphereZ <= Settings.FAR + Settings.CHUNK_SPHERE_RADIUS)) {
+//			return false;
+//		}
+//		
+//		var sphereY = sphereVector.dot(camera.getUp());
+//		var distanceY = factorY * Settings.CHUNK_SPHERE_RADIUS + sphereZ * tanY;
+//		if (!(-distanceY <= sphereY && sphereY <= distanceY)) {
+//			return false;
+//		}
+//		
+//		var sphereX = sphereVector.dot(camera.getRight());
+//		var distanceX = factorX * Settings.CHUNK_SPHERE_RADIUS + sphereZ * tanX;
+//		if (!(-distanceX <= sphereY && sphereX <= distanceX)) {
+//			return false;
+//		}
+//		
+//		return true;
 	}
 
 }

@@ -3,38 +3,34 @@ package voxel.server;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.UUID;
 import java.util.concurrent.ThreadFactory;
 
-import org.joml.Vector3f;
-
-import lombok.Getter;
-import voxel.common.packet.ConnectionState;
-import voxel.common.packet.Packet;
-import voxel.common.packet.PacketRegistries;
-import voxel.common.packet.Remote;
-import voxel.common.packet.clientbound.login.LoginSuccessPacket;
-import voxel.common.packet.clientbound.other.PongPacket;
-import voxel.common.packet.clientbound.play.PlayerInfoUpdatePacket;
-import voxel.common.packet.clientbound.play.UpdateEntityPositionAndRotationPacket;
-import voxel.common.packet.clientbound.status.StatusResponsePacket;
-import voxel.common.packet.serverbound.ServerBoundPacketHandler;
-import voxel.common.packet.serverbound.handshake.HandshakePacket;
-import voxel.common.packet.serverbound.login.LoginAcknowledgedPacket;
-import voxel.common.packet.serverbound.login.LoginStartPacket;
-import voxel.common.packet.serverbound.other.PingPacket;
-import voxel.common.packet.serverbound.play.SetPlayerPositionAndRotationPacket;
-import voxel.common.packet.serverbound.status.StatusRequestPacket;
+import voxel.networking.Remote;
+import voxel.networking.packet.ConnectionState;
+import voxel.networking.packet.Packet;
+import voxel.networking.packet.PacketRegistries;
+import voxel.networking.packet.clientbound.login.LoginSuccessPacket;
+import voxel.networking.packet.clientbound.other.PongPacket;
+import voxel.networking.packet.clientbound.play.ChunkDataPacket;
+import voxel.networking.packet.clientbound.play.LoginPacket;
+import voxel.networking.packet.clientbound.play.PlayerInfoUpdatePacket;
+import voxel.networking.packet.clientbound.play.UpdateEntityPositionAndRotationPacket;
+import voxel.networking.packet.clientbound.status.StatusResponsePacket;
+import voxel.networking.packet.serverbound.ServerBoundPacketHandler;
+import voxel.networking.packet.serverbound.handshake.HandshakePacket;
+import voxel.networking.packet.serverbound.login.LoginAcknowledgedPacket;
+import voxel.networking.packet.serverbound.login.LoginStartPacket;
+import voxel.networking.packet.serverbound.other.PingPacket;
+import voxel.networking.packet.serverbound.play.SetPlayerPositionAndRotationPacket;
+import voxel.networking.packet.serverbound.status.StatusRequestPacket;
+import voxel.server.chunk.Chunk;
+import voxel.server.player.Player;
 
 public class RemoteClient extends Remote implements ServerBoundPacketHandler<RemoteClient> {
 
 	private final Server server;
-	private @Getter UUID uuid;
-	private String login;
+	private Player player;
 	private int latency;
-	private Vector3f position = new Vector3f();
-	private float yaw;
-	private float pitch;
 
 	public RemoteClient(Server server, Socket socket, ThreadFactory threadFactory) {
 		super(
@@ -70,76 +66,96 @@ public class RemoteClient extends Remote implements ServerBoundPacketHandler<Rem
 	public void onStatusRequest(RemoteClient remote, StatusRequestPacket packet) {
 		remote.offer(new StatusResponsePacket(
 			server.getName(),
-			server.getClientCount()
+			server.getPlayerCount()
 		));
 	}
 
 	@Override
 	public void onLogin(RemoteClient remote, LoginStartPacket packet) {
-		uuid = packet.uuid();
-		login = packet.login();
+		this.player = new Player(this, packet.uuid(), packet.login());
+		this.server.getPlayers().add(player);
 
-		remote.offer(new LoginSuccessPacket(uuid, login));
+		remote.offer(new LoginSuccessPacket(player.getUuid(), player.getLogin()));
 	}
 
 	@Override
 	public void onLoginAcknowledged(RemoteClient remote, LoginAcknowledgedPacket packet) {
 		remote.state = ConnectionState.PLAY;
 
+		remote.offer(new LoginPacket(server.getWorld().getName()));
+
 		final var mask = (byte) (PlayerInfoUpdatePacket.Action.ADD_PLAYER.bit() | PlayerInfoUpdatePacket.Action.UPDATE_LATENCY.bit());
 
 		final var selfPacket = new PlayerInfoUpdatePacket(
 			mask,
-			Collections.singletonList(new PlayerInfoUpdatePacket.PlayerData(uuid, login, latency))
+			Collections.singletonList(new PlayerInfoUpdatePacket.PlayerData(player.getUuid(), player.getLogin(), latency))
 		);
 
-		final var others = server.getAuthenticatedClients();
+		final var others = server.getPlayers();
 		final var players = new ArrayList<PlayerInfoUpdatePacket.PlayerData>(others.size());
 
 		for (final var other : others) {
-			if (other == remote) {
+			if (other == player) {
 				continue;
 			}
 
-			other.offer(selfPacket);
+			other.getClient().offer(selfPacket);
 			players.add(new PlayerInfoUpdatePacket.PlayerData(
-				other.uuid,
-				other.login,
-				other.latency
+				other.getUuid(),
+				other.getLogin(),
+				other.getClient().latency
 			));
 		}
 
 		if (!players.isEmpty()) {
 			remote.offer(new PlayerInfoUpdatePacket(mask, players));
 		}
+
+		for (final var chunk : server.getWorld().getChunkManager().getAll()) {
+			final var voxelIds = new byte[Chunk.VOLUME];
+
+			for (final var section : chunk.getSections()) {
+				for (var y = 0; y < Chunk.SECTION_DEPTH; y++) {
+					for (var z = 0; z < Chunk.HEIGHT; z++) {
+						for (var x = 0; x < Chunk.WIDTH; x++) {
+							final var index = voxel.client.chunk.Chunk.index(
+								x,
+								y + (section.getY() * Chunk.SECTION_DEPTH),
+								z
+							);
+
+							//							System.out.printf("section.y%d index=%d %n", section.getY(), index);
+							voxelIds[index] = section.getType(x, y, z);
+						}
+					}
+				}
+			}
+
+			remote.offer(new ChunkDataPacket(chunk.getX(), chunk.getZ(), voxelIds));
+		}
 	}
 
 	@Override
 	public void onSetPlayerPositionAndRotation(RemoteClient remote, SetPlayerPositionAndRotationPacket packet) {
-		position.x = packet.x();
-		position.y = packet.y();
-		position.z = packet.z();
-		yaw = packet.yaw();
-		pitch = packet.pitch();
+		player.updateLocation(packet.x(), packet.y(), packet.z(), packet.yaw(), packet.pitch());
 
 		final var updatePacket = new UpdateEntityPositionAndRotationPacket(
-			uuid,
-			position.x, position.y, position.z,
-			yaw, pitch
+			player.getUuid(),
+			player.getPosition().x(),
+			player.getPosition().y(),
+			player.getPosition().z(),
+			player.getYaw(),
+			player.getPitch()
 		);
 
-		final var others = server.getAuthenticatedClients();
+		final var others = server.getPlayers();
 		for (final var other : others) {
-			if (other == remote) {
+			if (other == player) {
 				continue;
 			}
 
-			other.offer(updatePacket);
+			other.getClient().offer(updatePacket);
 		}
-	}
-
-	public boolean isAuthenticated() {
-		return uuid != null && login != null;
 	}
 
 }

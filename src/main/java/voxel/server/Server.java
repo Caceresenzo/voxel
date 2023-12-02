@@ -1,82 +1,60 @@
 package voxel.server;
 
-import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.ThreadFactory;
 
 import lombok.Getter;
+import lombok.SneakyThrows;
+import voxel.server.chunk.generator.SimplexNoiseChunkGenerator;
+import voxel.server.player.Player;
+import voxel.server.world.World;
+import voxel.server.world.WorldCreator;
 
-public class Server implements Runnable {
+public class Server {
 
-	private final @Getter String name;
-	private final ServerSocket serverSocket;
-	private final ThreadFactory threadFactory;
-	private final Thread thread;
+	@Getter
+	private final String name;
 
-	private final List<RemoteClient> clients;
+	@Getter
+	private final List<Player> players = Collections.synchronizedList(new ArrayList<>());
 
-	public Server(String name, ServerSocket serverSocket, ThreadFactory threadFactory) {
+	@Getter
+	private final World world = new World(new WorldCreator("overworld", new SimplexNoiseChunkGenerator()));
+
+	private ConnectionAcceptor networkServer;
+	private boolean running;
+
+	public Server(String name) {
 		this.name = name;
-		this.serverSocket = serverSocket;
-		this.threadFactory = threadFactory;
-		this.thread = threadFactory.newThread(this);
-		this.clients = Collections.synchronizedList(new ArrayList<>());
 	}
 
-	public void start() {
-		thread.start();
+	public void start(ConnectionAcceptor networkServer) {
+		world.loadSpawnChunks();
+
+		this.networkServer = networkServer;
+		this.networkServer.start(this);
+
+		this.running = true;
 	}
 
-	public void stop() {
-		thread.interrupt();
-	}
-
-	@Override
-	public void run() {
-		try {
-			while (true) {
-				final Socket clientSocket;
-				try {
-					clientSocket = serverSocket.accept();
-				} catch (IOException exception) {
-					exception.printStackTrace();
-					continue;
-				}
-
-				final var client = new RemoteClient(this, clientSocket, threadFactory);
-				clients.add(client);
-
-				client.start();
-			}
-		} catch (Exception exception) {
-			if (!(exception instanceof InterruptedException)) {
-				throw exception;
-			}
+	@SneakyThrows
+	public void loop() {
+		while (running) {
+			Thread.sleep(Duration.ofMillis(50));
 		}
 	}
 
-	public long getClientCount() {
-		return clients.size();
-	}
-	
-	public List<RemoteClient> getClients() {
-		return Collections.unmodifiableList(clients);
-	}
-	
-	public List<RemoteClient> getAuthenticatedClients() {
-		return clients.stream()
-			.filter(RemoteClient::isAuthenticated)
-			.toList();
+	public void stop() {
+		this.networkServer.stop();
+		this.networkServer = null;
+
+		this.running = false;
 	}
 
-	public static Server create(String name, int port) throws IOException {
-		final var serverSocket = new ServerSocket(port);
-
-		return new Server(name, serverSocket, Thread.ofVirtual().factory());
+	public int getPlayerCount() {
+		return players.size();
 	}
 
 }

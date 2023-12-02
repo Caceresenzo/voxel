@@ -4,6 +4,8 @@ import java.util.UUID;
 
 import org.joml.Vector3f;
 
+import voxel.client.world.World;
+
 public interface Player {
 
 	UUID getUUID();
@@ -15,5 +17,7 @@ public interface Player {
 	float getYaw();
 
 	float getPitch();
+	
+	World getWorld();
 
 }
