@@ -1,5 +1,8 @@
 package voxel.client.state;
 
+import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_LEFT;
+import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_RIGHT;
+import static org.lwjgl.glfw.GLFW.GLFW_PRESS;
 import static org.lwjgl.glfw.GLFW.glfwSetMouseButtonCallback;
 
 import java.util.concurrent.CountDownLatch;
@@ -12,6 +15,7 @@ import opengl.texture.ImageData;
 import opengl.texture.Texture;
 import voxel.client.Game;
 import voxel.client.RemoteServer;
+import voxel.client.VoxelHandler;
 import voxel.client.chunk.ChunkShaderProgram;
 import voxel.client.crosshair.CrossHair;
 import voxel.client.crosshair.CrossHairMesh;
@@ -36,7 +40,7 @@ public class PlayingGameState implements GameState {
 	private Texture frameTexture;
 	private Texture texture;
 	private Atlas atlas;
-	//	private VoxelHandler voxelHandler;
+	private VoxelHandler voxelHandler;
 
 	private MarkerShaderProgram markerShaderProgram;
 	private MarkerMesh markerMesh;
@@ -63,9 +67,6 @@ public class PlayingGameState implements GameState {
 		chunkShaderProgram.use();
 		chunkShaderProgram.atlas.load(0);
 
-		//		System.out.println("set world");
-		//		world = new World(chunkShaderProgram);
-
 		player.update();
 
 		chunkShaderProgram.use();
@@ -83,8 +84,6 @@ public class PlayingGameState implements GameState {
 			ImageData.load(getClass().getResourceAsStream("/textures/atlas.png"), true),
 			8
 		);
-
-		//		voxelHandler = new VoxelHandler(player, world);
 
 		markerShaderProgram = MarkerShaderProgram.create();
 
@@ -105,22 +104,21 @@ public class PlayingGameState implements GameState {
 		crossHairMesh = new CrossHairMesh(crossHairShaderProgram);
 		crossHair = new CrossHair(crossHairMesh);
 
-		//		glfwSetMouseButtonCallback(Game.window, (window, button, action, mods) -> {
-		//			if (action == GLFW_PRESS) {
-		//				if (button == GLFW_MOUSE_BUTTON_LEFT) {
-		//					voxelHandler.destroy();
-		//				}
-		//
-		//				if (button == GLFW_MOUSE_BUTTON_RIGHT) {
-		//					voxelHandler.place();
-		//				}
-		//			}
-		//		});
+		glfwSetMouseButtonCallback(Game.window, (window, button, action, mods) -> {
+			if (voxelHandler == null) {
+				return;
+			}
 
-		//		world.getChunkManager().load(ChunkKey.of(0, 0)).fill((byte) 1);
-		//		world.getChunkManager().load(ChunkKey.of(1, 0)).fill((byte) 2);
-		//		world.getChunkManager().load(ChunkKey.of(1, 1)).fill((byte) 3);
-		//		world.getChunkManager().load(ChunkKey.of(0, 1)).fill((byte) 4);
+			if (action == GLFW_PRESS) {
+				if (button == GLFW_MOUSE_BUTTON_LEFT) {
+					voxelHandler.destroy();
+				}
+
+				if (button == GLFW_MOUSE_BUTTON_RIGHT) {
+					voxelHandler.place();
+				}
+			}
+		});
 
 		initializeLatch.countDown();
 	}
@@ -132,6 +130,8 @@ public class PlayingGameState implements GameState {
 
 	public World setWorld(String name) {
 		this.world = new World(name, chunkShaderProgram);
+		this.voxelHandler = new VoxelHandler(player, world);
+
 		return world;
 	}
 
@@ -150,7 +150,10 @@ public class PlayingGameState implements GameState {
 		}
 
 		player.update();
-		//		voxelHandler.update();
+
+		if (voxelHandler != null) {
+			voxelHandler.update();
+		}
 	}
 
 	@Override
@@ -163,7 +166,9 @@ public class PlayingGameState implements GameState {
 			world.render(player);
 		}
 
-		//		marker.render(player, voxelHandler);
+		if (voxelHandler != null) {
+			marker.render(player, voxelHandler);
+		}
 
 		texture.activate(0);
 		for (final var otherPlayer : server.getOtherPlayers()) {
