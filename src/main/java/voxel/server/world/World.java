@@ -30,7 +30,7 @@ public class World {
 			final var key = ChunkKey.zero();
 			getChunk(key).load();
 		} else {
-			for (var y = -radius; y <= radius; ++y) {
+			for (var y = 0; y <= radius; ++y) {
 				for (var x = -radius; x <= radius; ++x) {
 					for (var z = -radius; z <= radius; ++z) {
 						final var key = new ChunkKey(x, y, z);
