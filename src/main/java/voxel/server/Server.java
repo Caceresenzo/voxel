@@ -7,6 +7,7 @@ import java.util.List;
 
 import lombok.Getter;
 import lombok.SneakyThrows;
+import voxel.networking.packet.clientbound.play.BlockUpdatePacket;
 import voxel.server.chunk.generator.SimplexNoiseChunkGenerator;
 import voxel.server.player.Player;
 import voxel.server.world.World;
@@ -55,6 +56,12 @@ public class Server {
 
 	public int getPlayerCount() {
 		return players.size();
+	}
+
+	public void broadcast(BlockUpdatePacket updatePacket) {
+		for (final var player : players) {
+			player.getClient().offer(updatePacket);
+		}
 	}
 
 }

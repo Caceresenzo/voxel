@@ -40,7 +40,7 @@ public class PlayingGameState implements GameState {
 	private Texture frameTexture;
 	private Texture texture;
 	private Atlas atlas;
-	private VoxelHandler voxelHandler;
+	private @Getter VoxelHandler voxelHandler;
 
 	private MarkerShaderProgram markerShaderProgram;
 	private MarkerMesh markerMesh;
@@ -130,7 +130,7 @@ public class PlayingGameState implements GameState {
 
 	public World setWorld(String name) {
 		this.world = new World(name, chunkShaderProgram);
-		this.voxelHandler = new VoxelHandler(player, world);
+		this.voxelHandler = new VoxelHandler(player, world, server);
 
 		return world;
 	}

@@ -5,12 +5,16 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.concurrent.ThreadFactory;
 
+import org.joml.Vector3i;
+
+import voxel.client.VoxelHandler;
 import voxel.networking.Remote;
 import voxel.networking.packet.ConnectionState;
 import voxel.networking.packet.Packet;
 import voxel.networking.packet.PacketRegistries;
 import voxel.networking.packet.clientbound.login.LoginSuccessPacket;
 import voxel.networking.packet.clientbound.other.PongPacket;
+import voxel.networking.packet.clientbound.play.BlockUpdatePacket;
 import voxel.networking.packet.clientbound.play.ChunkDataPacket;
 import voxel.networking.packet.clientbound.play.LoginPacket;
 import voxel.networking.packet.clientbound.play.PlayerInfoUpdatePacket;
@@ -21,10 +25,13 @@ import voxel.networking.packet.serverbound.handshake.HandshakePacket;
 import voxel.networking.packet.serverbound.login.LoginAcknowledgedPacket;
 import voxel.networking.packet.serverbound.login.LoginStartPacket;
 import voxel.networking.packet.serverbound.other.PingPacket;
+import voxel.networking.packet.serverbound.play.PlayerActionPacket;
 import voxel.networking.packet.serverbound.play.SetPlayerPositionAndRotationPacket;
+import voxel.networking.packet.serverbound.play.UseItemOnPacket;
 import voxel.networking.packet.serverbound.status.StatusRequestPacket;
 import voxel.server.chunk.Chunk;
 import voxel.server.player.Player;
+import voxel.shared.chunk.ChunkKey;
 
 public class RemoteClient extends Remote implements ServerBoundPacketHandler<RemoteClient> {
 
@@ -128,6 +135,30 @@ public class RemoteClient extends Remote implements ServerBoundPacketHandler<Rem
 	}
 
 	@Override
+	public void onPlayerAction(RemoteClient remote, PlayerActionPacket packet) {
+		final var chunkKey = ChunkKey.ofWorld(packet.blockX(), packet.blockY(), packet.blockZ());
+		final var chunk = server.getWorld().getChunk(chunkKey);
+
+		if (chunk == null) {
+			return;
+		}
+
+		final var worldPosition = new Vector3i(packet.blockX(), packet.blockY(), packet.blockZ());
+		final var localPosition = VoxelHandler.worldToLocal(worldPosition, chunk.getPosition());
+
+		switch (packet.status()) {
+			case STARTED_DIGGING: {
+				final var air = (byte) 0;
+				chunk.setVoxel(localPosition.x, localPosition.y, localPosition.z, air);
+
+				final var updatePacket = new BlockUpdatePacket(packet.blockX(), packet.blockY(), packet.blockZ(), air);
+				server.broadcast(updatePacket);
+				break;
+			}
+		}
+	}
+
+	@Override
 	public void onSetPlayerPositionAndRotation(RemoteClient remote, SetPlayerPositionAndRotationPacket packet) {
 		player.updateLocation(packet.x(), packet.y(), packet.z(), packet.yaw(), packet.pitch());
 
@@ -148,6 +179,26 @@ public class RemoteClient extends Remote implements ServerBoundPacketHandler<Rem
 
 			other.getClient().offer(updatePacket);
 		}
+	}
+
+	@Override
+	public void onUseItemOn(RemoteClient remote, UseItemOnPacket packet) {
+		final var blockPosition = packet.blockPosition().add(packet.face().getRelative());
+
+		final var chunkKey = ChunkKey.ofWorld(blockPosition);
+		final var chunk = server.getWorld().getChunk(chunkKey);
+
+		if (chunk == null) {
+			return;
+		}
+
+		final var localPosition = VoxelHandler.worldToLocal(blockPosition, chunk.getPosition());
+
+		final var grass = (byte) 1;
+		chunk.setVoxel(localPosition.x, localPosition.y, localPosition.z, grass);
+
+		final var updatePacket = new BlockUpdatePacket(blockPosition, grass);
+		server.broadcast(updatePacket);
 	}
 
 }

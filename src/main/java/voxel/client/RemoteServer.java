@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import org.joml.Vector3i;
+
 import lombok.Getter;
 import voxel.client.player.LocalPlayer;
 import voxel.client.player.RemotePlayer;
@@ -18,6 +20,7 @@ import voxel.networking.packet.PacketRegistries;
 import voxel.networking.packet.clientbound.ClientBoundPacketHandler;
 import voxel.networking.packet.clientbound.login.LoginSuccessPacket;
 import voxel.networking.packet.clientbound.other.PongPacket;
+import voxel.networking.packet.clientbound.play.BlockUpdatePacket;
 import voxel.networking.packet.clientbound.play.ChunkDataPacket;
 import voxel.networking.packet.clientbound.play.LoginPacket;
 import voxel.networking.packet.clientbound.play.PlayerInfoUpdatePacket;
@@ -91,6 +94,21 @@ public class RemoteServer extends Remote implements ClientBoundPacketHandler<Rem
 
 		final var world = gameState.setWorld(packet.dimensionName());
 		player.setWorld(world);
+	}
+	
+	@Override
+	public void onBlockUpdate(RemoteServer remote, BlockUpdatePacket packet) {
+		final var blockPosition = new Vector3i(packet.x(), packet.y(), packet.z());
+		
+		final var chunk = player.getWorld().getChunkAt(blockPosition);
+		if (chunk == null) {
+			return;
+		}
+		
+		final var localPosition = VoxelHandler.worldToLocal(blockPosition, chunk.getPosition());
+
+		chunk.setVoxel(localPosition.x, localPosition.y, localPosition.z, packet.id());
+		gameState.getVoxelHandler().rebuildAdjacentChunks(chunk, localPosition);
 	}
 
 	@Override

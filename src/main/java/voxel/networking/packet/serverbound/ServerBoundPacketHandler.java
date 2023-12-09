@@ -6,7 +6,9 @@ import voxel.networking.packet.serverbound.handshake.HandshakePacket;
 import voxel.networking.packet.serverbound.login.LoginAcknowledgedPacket;
 import voxel.networking.packet.serverbound.login.LoginStartPacket;
 import voxel.networking.packet.serverbound.other.PingPacket;
+import voxel.networking.packet.serverbound.play.PlayerActionPacket;
 import voxel.networking.packet.serverbound.play.SetPlayerPositionAndRotationPacket;
+import voxel.networking.packet.serverbound.play.UseItemOnPacket;
 import voxel.networking.packet.serverbound.status.StatusRequestPacket;
 
 public interface ServerBoundPacketHandler<T extends Remote> {
@@ -21,7 +23,11 @@ public interface ServerBoundPacketHandler<T extends Remote> {
 
 	void onLoginAcknowledged(T remote, LoginAcknowledgedPacket packet);
 
+	void onPlayerAction(T remote, PlayerActionPacket packet);
+	
 	void onSetPlayerPositionAndRotation(T remote, SetPlayerPositionAndRotationPacket packet);
+	
+	void onUseItemOn(T remote, UseItemOnPacket packet);
 
 	public static <T extends Remote> boolean dispatch(ServerBoundPacketHandler<T> handler, T remote, Packet packet) {
 		if (packet instanceof HandshakePacket packet_) {
@@ -49,8 +55,18 @@ public interface ServerBoundPacketHandler<T extends Remote> {
 			return true;
 		}
 
+		if (packet instanceof PlayerActionPacket packet_) {
+			handler.onPlayerAction(remote, packet_);
+			return true;
+		}
+		
 		if (packet instanceof SetPlayerPositionAndRotationPacket packet_) {
 			handler.onSetPlayerPositionAndRotation(remote, packet_);
+			return true;
+		}
+		
+		if (packet instanceof UseItemOnPacket packet_) {
+			handler.onUseItemOn(remote, packet_);
 			return true;
 		}
 

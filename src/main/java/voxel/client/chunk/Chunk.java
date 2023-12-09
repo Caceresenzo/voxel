@@ -103,6 +103,15 @@ public class Chunk implements ChunkConstants {
 		//		}
 	}
 
+	public void setVoxel(int x, int y, int z, byte value) {
+		final var index = index(x, y, z);
+
+		voxels[index] = value;
+
+		testIfEmpty();
+		deleteMesh();
+	}
+
 	public void deleteMesh() {
 		if (mesh != null) {
 			mesh.delete();

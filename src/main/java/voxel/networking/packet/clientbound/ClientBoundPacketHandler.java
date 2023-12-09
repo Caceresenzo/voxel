@@ -4,6 +4,7 @@ import voxel.networking.Remote;
 import voxel.networking.packet.Packet;
 import voxel.networking.packet.clientbound.login.LoginSuccessPacket;
 import voxel.networking.packet.clientbound.other.PongPacket;
+import voxel.networking.packet.clientbound.play.BlockUpdatePacket;
 import voxel.networking.packet.clientbound.play.ChunkDataPacket;
 import voxel.networking.packet.clientbound.play.LoginPacket;
 import voxel.networking.packet.clientbound.play.PlayerInfoUpdatePacket;
@@ -18,9 +19,11 @@ public interface ClientBoundPacketHandler<T extends Remote> {
 
 	void onLoginSuccess(T remote, LoginSuccessPacket packet);
 
-	void onChunkData(T remote, ChunkDataPacket packet);
-
 	void onLogin(T remote, LoginPacket packet);
+
+	void onBlockUpdate(T remote, BlockUpdatePacket packet);
+
+	void onChunkData(T remote, ChunkDataPacket packet);
 
 	void onPlayerInfoUpdate(T remote, PlayerInfoUpdatePacket packet);
 
@@ -42,13 +45,18 @@ public interface ClientBoundPacketHandler<T extends Remote> {
 			return true;
 		}
 
-		if (packet instanceof ChunkDataPacket packet_) {
-			handler.onChunkData(remote, packet_);
+		if (packet instanceof LoginPacket packet_) {
+			handler.onLogin(remote, packet_);
 			return true;
 		}
 
-		if (packet instanceof LoginPacket packet_) {
-			handler.onLogin(remote, packet_);
+		if (packet instanceof BlockUpdatePacket packet_) {
+			handler.onBlockUpdate(remote, packet_);
+			return true;
+		}
+		
+		if (packet instanceof ChunkDataPacket packet_) {
+			handler.onChunkData(remote, packet_);
 			return true;
 		}
 

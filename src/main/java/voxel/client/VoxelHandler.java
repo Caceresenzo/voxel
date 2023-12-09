@@ -1,9 +1,5 @@
 package voxel.client;
 
-import java.text.NumberFormat;
-import java.util.ArrayList;
-
-import org.apache.commons.lang3.tuple.Pair;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 import org.joml.Vector3ic;
@@ -13,6 +9,9 @@ import lombok.RequiredArgsConstructor;
 import voxel.client.chunk.Chunk;
 import voxel.client.player.LocalPlayer;
 import voxel.client.world.World;
+import voxel.networking.packet.serverbound.play.PlayerActionPacket;
+import voxel.networking.packet.serverbound.play.UseItemOnPacket;
+import voxel.shared.chunk.Face;
 import voxel.shared.chunk.Plane;
 
 @RequiredArgsConstructor
@@ -20,6 +19,7 @@ public class VoxelHandler {
 
 	private final LocalPlayer player;
 	private final World world;
+	private final RemoteServer server;
 
 	private @Getter Vector3i currentVoxelPosition;
 	private @Getter Vector3i voxelWorldPosition;
@@ -38,7 +38,7 @@ public class VoxelHandler {
 
 	public boolean place() {
 		if (rayCast() && getVoxelId(new Vector3i(currentVoxelPosition).add(voxelNormal)) && voxelId == 0) {
-			// TODO Send packet
+			server.offer(new UseItemOnPacket(currentVoxelPosition, Face.from(voxelNormal)));
 			return true;
 		}
 
@@ -47,8 +47,8 @@ public class VoxelHandler {
 
 	public boolean destroy() {
 		if (rayCast() && voxelId != 0) {
-			// TODO Send packet
-			rebuildAdjacentChunks();
+			server.offer(PlayerActionPacket.startedDigging(currentVoxelPosition, Face.from(voxelNormal)));
+			//			rebuildAdjacentChunks();
 			return true;
 		}
 
@@ -63,16 +63,16 @@ public class VoxelHandler {
 		}
 	}
 
-	public void rebuildAdjacentChunks() {
+	public void rebuildAdjacentChunks(Chunk chunk, Vector3ic localPosition) {
 		final var chunkPosition = chunk.getPosition();
 
-		if (voxelLocalPosition.x == 0) {
+		if (localPosition.x() == 0) {
 			rebuildAdjacentChunk(
 				chunkPosition.x() - 1,
 				chunkPosition.y(),
 				chunkPosition.z()
 			);
-		} else if (voxelLocalPosition.x == Settings.CHUNK_SIZE - 1) {
+		} else if (localPosition.x() == Chunk.WIDTH - 1) {
 			rebuildAdjacentChunk(
 				chunkPosition.x() + 1,
 				chunkPosition.y(),
@@ -80,27 +80,27 @@ public class VoxelHandler {
 			);
 		}
 
-		if (voxelLocalPosition.y == 0) {
+		if (localPosition.y() == 0) {
 			rebuildAdjacentChunk(
 				chunkPosition.x(),
 				chunkPosition.y() - 1,
 				chunkPosition.z()
 			);
-		} else if (voxelLocalPosition.y == Settings.CHUNK_SIZE - 1) {
+		} else if (localPosition.y() == Chunk.DEPTH - 1) {
 			rebuildAdjacentChunk(
 				chunkPosition.x(),
-				chunkPosition.y() - 1,
+				chunkPosition.y() + 1,
 				chunkPosition.z()
 			);
 		}
 
-		if (voxelLocalPosition.z == 0) {
+		if (localPosition.z() == 0) {
 			rebuildAdjacentChunk(
 				chunkPosition.x(),
 				chunkPosition.y(),
 				chunkPosition.z() - 1
 			);
-		} else if (voxelLocalPosition.z == Settings.CHUNK_SIZE - 1) {
+		} else if (localPosition.z() == Chunk.HEIGHT - 1) {
 			rebuildAdjacentChunk(
 				chunkPosition.x(),
 				chunkPosition.y(),
@@ -237,9 +237,9 @@ public class VoxelHandler {
 	}
 
 	public static Vector3i worldToLocal(Vector3ic position, Vector3ic chunkPosition) {
-		int x = (position.x() - (chunkPosition.x() * Chunk.WIDTH)) % Chunk.WIDTH;
-		int y = (position.y() - (chunkPosition.y() * Chunk.DEPTH)) % Chunk.DEPTH;
-		int z = (position.z() - (chunkPosition.z() * Chunk.HEIGHT)) % Chunk.HEIGHT;
+		var x = (position.x() - (chunkPosition.x() * Chunk.WIDTH)) % Chunk.WIDTH;
+		var y = (position.y() - (chunkPosition.y() * Chunk.DEPTH)) % Chunk.DEPTH;
+		var z = (position.z() - (chunkPosition.z() * Chunk.HEIGHT)) % Chunk.HEIGHT;
 
 		x = (x + Chunk.WIDTH) % Chunk.WIDTH;
 		y = (y + Chunk.DEPTH) % Chunk.DEPTH;
