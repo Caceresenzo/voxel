@@ -160,13 +160,11 @@ public class RemoteClient extends Remote implements ServerBoundPacketHandler<Rem
 
 	@Override
 	public void onSetPlayerPositionAndRotation(RemoteClient remote, SetPlayerPositionAndRotationPacket packet) {
-		player.updateLocation(packet.x(), packet.y(), packet.z(), packet.yaw(), packet.pitch());
+		player.updateLocation(packet.position(), packet.yaw(), packet.pitch());
 
 		final var updatePacket = new UpdateEntityPositionAndRotationPacket(
 			player.getUuid(),
-			player.getPosition().x(),
-			player.getPosition().y(),
-			player.getPosition().z(),
+			player.getPosition(),
 			player.getYaw(),
 			player.getPitch()
 		);

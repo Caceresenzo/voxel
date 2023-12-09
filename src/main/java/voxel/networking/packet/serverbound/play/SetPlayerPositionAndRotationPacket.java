@@ -2,6 +2,8 @@ package voxel.networking.packet.serverbound.play;
 
 import java.io.IOException;
 
+import org.joml.Vector3f;
+
 import voxel.networking.packet.Packet;
 import voxel.networking.packet.PacketSerializer;
 import voxel.util.data.BufferReader;
@@ -14,6 +16,10 @@ public record SetPlayerPositionAndRotationPacket(
 	float yaw,
 	float pitch
 ) implements Packet {
+
+	public Vector3f position() {
+		return new Vector3f(x, y, z);
+	}
 
 	public static final PacketSerializer<SetPlayerPositionAndRotationPacket> SERIALIZER = new PacketSerializer<SetPlayerPositionAndRotationPacket>() {
 
@@ -33,7 +39,7 @@ public record SetPlayerPositionAndRotationPacket(
 			final var z = input.readFloat();
 			final var yaw = input.readFloat();
 			final var pitch = input.readFloat();
-			
+
 			return new SetPlayerPositionAndRotationPacket(x, y, z, yaw, pitch);
 		}
 

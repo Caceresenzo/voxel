@@ -3,6 +3,7 @@ package voxel.server.player;
 import java.util.UUID;
 
 import org.joml.Vector3f;
+import org.joml.Vector3fc;
 
 import lombok.Getter;
 import lombok.NonNull;
@@ -35,9 +36,8 @@ public class Player {
 	@Setter
 	private float pitch;
 
-	public void updateLocation(float x, float y, float z, float yaw, float pitch) {
-		this.position.x = x;
-		this.position.y = y;
+	public void updateLocation(Vector3fc position, float yaw, float pitch) {
+		this.position.set(position);
 		this.yaw = yaw;
 		this.pitch = pitch;
 	}

@@ -3,12 +3,14 @@ package voxel.networking.packet.clientbound.play;
 import java.io.IOException;
 import java.util.UUID;
 
+import org.joml.Vector3fc;
+
 import voxel.networking.packet.Packet;
 import voxel.networking.packet.PacketSerializer;
 import voxel.util.data.BufferReader;
 import voxel.util.data.BufferWritter;
 
-public record UpdateEntityPositionAndRotationPacket (
+public record UpdateEntityPositionAndRotationPacket(
 	UUID playerId,
 	float x,
 	float y,
@@ -16,6 +18,17 @@ public record UpdateEntityPositionAndRotationPacket (
 	float yaw,
 	float pitch
 ) implements Packet {
+
+	public UpdateEntityPositionAndRotationPacket(UUID playerId, Vector3fc position, float yaw, float pitch) {
+		this(
+			playerId,
+			position.x(),
+			position.y(),
+			position.z(),
+			yaw,
+			pitch
+		);
+	}
 
 	public static final PacketSerializer<UpdateEntityPositionAndRotationPacket> SERIALIZER = new PacketSerializer<UpdateEntityPositionAndRotationPacket>() {
 
@@ -37,7 +50,7 @@ public record UpdateEntityPositionAndRotationPacket (
 			final var z = input.readFloat();
 			final var yaw = input.readFloat();
 			final var pitch = input.readFloat();
-			
+
 			return new UpdateEntityPositionAndRotationPacket(playerId, x, y, z, yaw, pitch);
 		}
 
