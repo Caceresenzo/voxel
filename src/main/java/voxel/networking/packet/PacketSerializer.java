@@ -22,7 +22,6 @@ public interface PacketSerializer<T extends Packet> {
 
 		@Override
 		public void serialize(T packet, BufferWritter output) throws IOException {
-
 		}
 
 		@Override
