@@ -68,7 +68,7 @@ public abstract class Remote {
 			return true;
 		}
 
-		System.err.printf("packet discarded (size=%d): %s", sizeBefore, packet);
+		System.err.printf("write packet discarded (size=%d): %s", sizeBefore, packet);
 		return false;
 	}
 

@@ -137,6 +137,8 @@ public class PlayingGameState implements GameState {
 
 	@Override
 	public void update() {
+		server.processPackets();
+
 		if (player.handleMouvement()) {
 			final var position = player.getPosition();
 
