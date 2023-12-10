@@ -9,6 +9,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
+import lombok.Getter;
 import lombok.SneakyThrows;
 import voxel.networking.packet.ConnectionState;
 import voxel.networking.packet.Packet;
@@ -23,7 +24,7 @@ public abstract class Remote {
 	public static final int MAX_PACKET_QUEUE_SIZE = 1024 * 8;
 
 	private final Socket socket;
-	protected ConnectionState state = ConnectionState.HANDSHAKE;
+	protected @Getter ConnectionState state = ConnectionState.HANDSHAKE;
 
 	private final PacketRegistry readPacketRegistry;
 	private final Thread readThread;
