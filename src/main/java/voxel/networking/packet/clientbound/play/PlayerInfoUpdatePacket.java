@@ -52,7 +52,7 @@ public record PlayerInfoUpdatePacket(
 	) {
 
 		public PlayerData {
-			Objects.requireNonNull("uuid", "uuid cannot be null");
+			Objects.requireNonNull(uuid, "uuid cannot be null");
 		}
 
 	}
@@ -66,7 +66,7 @@ public record PlayerInfoUpdatePacket(
 
 			for (final var player : packet.players) {
 				output.writeUUID(player.uuid);
-				
+
 				if (Action.ADD_PLAYER.test(packet.actionMask)) {
 					output.writeAsciiString(player.login);
 				}

@@ -3,6 +3,9 @@ package voxel.util.data;
 import java.io.IOException;
 import java.util.UUID;
 
+import voxel.shared.block.BlockPosition;
+import voxel.shared.chunk.ChunkPosition;
+
 public interface BufferWritter {
 
 	void write(int value) throws IOException;
@@ -26,7 +29,13 @@ public interface BufferWritter {
 	void writeDouble(double value) throws IOException;
 
 	void writeAsciiString(String value) throws IOException;
-	
+
 	void writeUUID(UUID value) throws IOException;
+
+	void writeChunkPosition(ChunkPosition position) throws IOException;
+
+	void writeBlockPosition(BlockPosition position) throws IOException;
+
+	void writeByteArray(byte[] array) throws IOException;
 
 }

@@ -7,6 +7,7 @@ import opengl.vertex.UsageType;
 import opengl.vertex.VertexArray;
 import opengl.vertex.VertexBuffer;
 import voxel.client.Settings;
+import voxel.shared.chunk.Chunk;
 import voxel.shared.chunk.Face;
 import voxel.shared.chunk.Plane;
 
@@ -19,12 +20,12 @@ public class ChunkMeshBuilder {
 	public static final int Y_SHIFT = Z_SHIFT + 6;
 	public static final int X_SHIFT = Y_SHIFT + 6;
 
-	private final Chunk chunk;
+	private final ClientChunk chunk;
 	private final CubicNeighborChunks neighbors;
 	private final Vector3i faceRelative = new Vector3i();
 	private final Vector3i adjustedPosition = new Vector3i();
 
-	public ChunkMeshBuilder(Chunk chunk) {
+	public ChunkMeshBuilder(ClientChunk chunk) {
 		this.chunk = chunk;
 		this.neighbors = CubicNeighborChunks.from(chunk);
 	}
@@ -41,7 +42,7 @@ public class ChunkMeshBuilder {
 		return new ChunkMesh(chunk, array);
 	}
 
-	public Chunk getChunk(int x, int y, int z) {
+	public ClientChunk getChunk(int x, int y, int z) {
 		adjustedPosition.set(x, y, z);
 		faceRelative.zero();
 		var ySign = 0;
@@ -80,7 +81,7 @@ public class ChunkMeshBuilder {
 			return true;
 		}
 
-		final var voxelId = chunk.getVoxelId(adjustedPosition.x, adjustedPosition.y, adjustedPosition.z);
+		final var voxelId = chunk.getVoxel(adjustedPosition.x, adjustedPosition.y, adjustedPosition.z);
 		return voxelId == 0;
 	}
 
@@ -145,7 +146,7 @@ public class ChunkMeshBuilder {
 		for (var x = 0; x < Chunk.WIDTH; ++x) {
 			for (var y = 0; y < Chunk.DEPTH; ++y) {
 				for (var z = 0; z < Chunk.HEIGHT; ++z) {
-					final var voxelId = chunk.getVoxelId(x, y, z);
+					final var voxelId = chunk.getVoxel(x, y, z);
 					if (voxelId == 0) {
 						continue;
 					}
@@ -337,10 +338,6 @@ public class ChunkMeshBuilder {
 		System.arraycopy(vertices, 0, trimmed, 0, trimmed.length);
 
 		return trimmed;
-	}
-
-	public static int positiveMod(int dividend, int divisor) {
-		return (dividend % divisor + divisor) % divisor;
 	}
 
 	public static int packData(int x, int y, int z, int voxelId, int faceId, int ambiantOcclusionId, int flipId) {

@@ -7,6 +7,8 @@ import java.util.UUID;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import voxel.shared.block.BlockPosition;
+import voxel.shared.chunk.ChunkPosition;
 
 @RequiredArgsConstructor
 public class ArrayBufferWriter implements BufferWritter {
@@ -102,6 +104,26 @@ public class ArrayBufferWriter implements BufferWritter {
 	public void writeUUID(UUID value) throws IOException {
 		writeLong(value.getMostSignificantBits());
 		writeLong(value.getLeastSignificantBits());
+	}
+
+	@Override
+	public void writeChunkPosition(ChunkPosition position) throws IOException {
+		writeInt(position.x());
+		writeInt(position.y());
+		writeInt(position.z());
+	}
+
+	@Override
+	public void writeBlockPosition(BlockPosition position) throws IOException {
+		writeInt(position.x());
+		writeInt(position.y());
+		writeInt(position.z());
+	}
+
+	@Override
+	public void writeByteArray(byte[] array) throws IOException {
+		writeInt(array.length);
+		write(array);
 	}
 
 }

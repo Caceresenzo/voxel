@@ -3,6 +3,9 @@ package voxel.util.data;
 import java.io.IOException;
 import java.util.UUID;
 
+import voxel.shared.block.BlockPosition;
+import voxel.shared.chunk.ChunkPosition;
+
 public interface BufferReader {
 
 	int read() throws IOException;
@@ -28,5 +31,11 @@ public interface BufferReader {
 	String readAsciiString() throws IOException;
 
 	UUID readUUID() throws IOException;
+
+	ChunkPosition readChunkPosition() throws IOException;
+
+	BlockPosition readBlockPosition() throws IOException;
+	
+	byte[] readByteArray() throws IOException;
 
 }

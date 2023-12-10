@@ -1,29 +1,31 @@
 package voxel.server.chunk.generator;
 
 import org.joml.SimplexNoise;
-import org.joml.Vector3ic;
 
-import voxel.server.chunk.Chunk;
+import voxel.server.chunk.ServerChunk;
 import voxel.server.world.World;
+import voxel.shared.chunk.ChunkPosition;
 
 public class SimplexNoiseChunkGenerator implements ChunkGenerator {
 
 	@Override
-	public void generate(World world, Vector3ic position, byte[] voxels) {
-		final var chunkX = position.x() * Chunk.DEPTH;
-		final var chunkY = position.y() * Chunk.DEPTH;
-		final var chunkZ = position.z() * Chunk.DEPTH;
+	public void generate(World world, ChunkPosition position, byte[] voxels) {
+		final var blockPosition = position.toBlockPosition();
 
-		for (var x = 0; x < Chunk.WIDTH; ++x) {
-			for (var z = 0; z < Chunk.HEIGHT; ++z) {
-				final var worldX = x + chunkX;
-				final var worldZ = z + chunkZ;
+		final var startX = blockPosition.x();
+		final var startY = blockPosition.y();
+		final var startZ = blockPosition.z();
+
+		for (var x = 0; x < ServerChunk.WIDTH; ++x) {
+			for (var z = 0; z < ServerChunk.HEIGHT; ++z) {
+				final var worldX = x + startX;
+				final var worldZ = z + startZ;
 
 				final var worldHeight = (int) (SimplexNoise.noise(worldX * 0.01f, worldZ * 0.01f) * 32 + 32);
-				final var localHeight = Math.min(worldHeight - chunkY, Chunk.DEPTH);
+				final var localHeight = Math.min(worldHeight - startY, ServerChunk.DEPTH);
 
 				for (var y = 0; y < localHeight; ++y) {
-					final var index = Chunk.index(x, y, z);
+					final var index = ServerChunk.index(x, y, z);
 
 					if (y == localHeight - 1) {
 						voxels[index] = (byte) 2;

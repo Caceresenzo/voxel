@@ -6,12 +6,16 @@ import org.joml.Vector3ic;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import voxel.client.chunk.Chunk;
+import voxel.client.chunk.ClientChunk;
 import voxel.client.player.LocalPlayer;
 import voxel.client.world.World;
 import voxel.networking.packet.serverbound.play.PlayerActionPacket;
 import voxel.networking.packet.serverbound.play.UseItemOnPacket;
+import voxel.shared.block.BlockPosition;
+import voxel.shared.chunk.Chunk;
+import voxel.shared.chunk.ChunkPosition;
 import voxel.shared.chunk.Face;
+import voxel.shared.chunk.LocalBlockPosition;
 import voxel.shared.chunk.Plane;
 
 @RequiredArgsConstructor
@@ -23,8 +27,8 @@ public class VoxelHandler {
 
 	private @Getter Vector3i currentVoxelPosition;
 	private @Getter Vector3i voxelWorldPosition;
-	private @Getter Vector3i voxelLocalPosition;
-	private @Getter Chunk chunk;
+	private @Getter LocalBlockPosition voxelLocalPosition;
+	private @Getter ClientChunk chunk;
 	private @Getter byte voxelId;
 	private @Getter Vector3i voxelNormal;
 
@@ -38,7 +42,7 @@ public class VoxelHandler {
 
 	public boolean place() {
 		if (rayCast() && getVoxelId(new Vector3i(currentVoxelPosition).add(voxelNormal)) && voxelId == 0) {
-			server.offer(new UseItemOnPacket(currentVoxelPosition, Face.from(voxelNormal)));
+			server.offer(new UseItemOnPacket(new BlockPosition(currentVoxelPosition), Face.from(voxelNormal)));
 			return true;
 		}
 
@@ -47,8 +51,7 @@ public class VoxelHandler {
 
 	public boolean destroy() {
 		if (rayCast() && voxelId != 0) {
-			server.offer(PlayerActionPacket.startedDigging(currentVoxelPosition, Face.from(voxelNormal)));
-			//			rebuildAdjacentChunks();
+			server.offer(PlayerActionPacket.startedDigging(new BlockPosition(currentVoxelPosition), Face.from(voxelNormal)));
 			return true;
 		}
 
@@ -63,7 +66,7 @@ public class VoxelHandler {
 		}
 	}
 
-	public void rebuildAdjacentChunks(Chunk chunk, Vector3ic localPosition) {
+	public void rebuildAdjacentChunks(ClientChunk chunk, LocalBlockPosition localPosition) {
 		final var chunkPosition = chunk.getPosition();
 
 		if (localPosition.x() == 0) {
@@ -72,7 +75,7 @@ public class VoxelHandler {
 				chunkPosition.y(),
 				chunkPosition.z()
 			);
-		} else if (localPosition.x() == Chunk.WIDTH - 1) {
+		} else if (localPosition.x() == ClientChunk.WIDTH - 1) {
 			rebuildAdjacentChunk(
 				chunkPosition.x() + 1,
 				chunkPosition.y(),
@@ -86,7 +89,7 @@ public class VoxelHandler {
 				chunkPosition.y() - 1,
 				chunkPosition.z()
 			);
-		} else if (localPosition.y() == Chunk.DEPTH - 1) {
+		} else if (localPosition.y() == ClientChunk.DEPTH - 1) {
 			rebuildAdjacentChunk(
 				chunkPosition.x(),
 				chunkPosition.y() + 1,
@@ -100,7 +103,7 @@ public class VoxelHandler {
 				chunkPosition.y(),
 				chunkPosition.z() - 1
 			);
-		} else if (localPosition.z() == Chunk.HEIGHT - 1) {
+		} else if (localPosition.z() == ClientChunk.HEIGHT - 1) {
 			rebuildAdjacentChunk(
 				chunkPosition.x(),
 				chunkPosition.y(),
@@ -227,7 +230,7 @@ public class VoxelHandler {
 		final var localPosition = worldToLocal(position, chunk.getPosition());
 
 		//		System.out.printf("localPosition=%s %n", localPosition.toString(NumberFormat.getIntegerInstance()));
-		final var voxelId = chunk.getVoxelId(localPosition.x, localPosition.y, localPosition.z);
+		final var voxelId = chunk.getVoxel(localPosition);
 
 		this.voxelId = voxelId;
 		this.voxelLocalPosition = localPosition;
@@ -236,7 +239,7 @@ public class VoxelHandler {
 		return true;
 	}
 
-	public static Vector3i worldToLocal(Vector3ic position, Vector3ic chunkPosition) {
+	public static LocalBlockPosition worldToLocal(Vector3ic position, ChunkPosition chunkPosition) {
 		var x = (position.x() - (chunkPosition.x() * Chunk.WIDTH)) % Chunk.WIDTH;
 		var y = (position.y() - (chunkPosition.y() * Chunk.DEPTH)) % Chunk.DEPTH;
 		var z = (position.z() - (chunkPosition.z() * Chunk.HEIGHT)) % Chunk.HEIGHT;
@@ -245,7 +248,7 @@ public class VoxelHandler {
 		y = (y + Chunk.DEPTH) % Chunk.DEPTH;
 		z = (z + Chunk.HEIGHT) % Chunk.HEIGHT;
 
-		return new Vector3i(x, y, z);
+		return new LocalBlockPosition(x, y, z);
 	}
 
 }

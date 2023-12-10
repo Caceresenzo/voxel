@@ -1,20 +1,19 @@
 package voxel.client.chunk;
 
 import org.joml.Matrix4f;
-import org.joml.Vector3f;
 
 import opengl.vertex.VertexArray;
 
 public class ChunkMesh {
 
-	private final Chunk chunk;
+	private final ClientChunk chunk;
 	private VertexArray vertexArray;
 	private Matrix4f modelMatrix;
 
-	public ChunkMesh(Chunk chunk, VertexArray vertexArray) {
+	public ChunkMesh(ClientChunk chunk, VertexArray vertexArray) {
 		this.chunk = chunk;
 		this.vertexArray = vertexArray;
-		this.modelMatrix = new Matrix4f().translate(new Vector3f(chunk.getWorldPosition()));
+		this.modelMatrix = new Matrix4f().translate(chunk.getPosition().toBlockPosition().toFloatVector());
 	}
 
 	public void render() {

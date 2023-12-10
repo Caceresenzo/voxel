@@ -7,6 +7,8 @@ import java.util.UUID;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import voxel.shared.block.BlockPosition;
+import voxel.shared.chunk.ChunkPosition;
 
 @RequiredArgsConstructor
 public class ArrayBufferReader implements BufferReader {
@@ -131,6 +133,34 @@ public class ArrayBufferReader implements BufferReader {
 	@Override
 	public UUID readUUID() throws IOException {
 		return new UUID(readLong(), readLong());
+	}
+
+	@Override
+	public ChunkPosition readChunkPosition() throws IOException {
+		return new ChunkPosition(
+			readInt(),
+			readInt(),
+			readInt()
+		);
+	}
+
+	@Override
+	public BlockPosition readBlockPosition() throws IOException {
+		return new BlockPosition(
+			readInt(),
+			readInt(),
+			readInt()
+		);
+	}
+
+	@Override
+	public byte[] readByteArray() throws IOException {
+		final var length = readInt();
+
+		final var array = new byte[length];
+		read(array);
+
+		return array;
 	}
 
 }

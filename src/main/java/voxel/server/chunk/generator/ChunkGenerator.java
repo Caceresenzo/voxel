@@ -1,11 +1,10 @@
 package voxel.server.chunk.generator;
 
-import org.joml.Vector3ic;
-
 import voxel.server.world.World;
+import voxel.shared.chunk.ChunkPosition;
 
 public interface ChunkGenerator {
 
-	void generate(World world, Vector3ic position, byte[] voxels);
+	void generate(World world, ChunkPosition position, byte[] voxels);
 
 }

@@ -20,8 +20,6 @@ public record HandshakePacket(
 
 	public static final PacketSerializer<HandshakePacket> SERIALIZER = new PacketSerializer<HandshakePacket>() {
 
-		private final ConnectionState[] values = ConnectionState.values();
-
 		@Override
 		public void serialize(HandshakePacket packet, BufferWritter output) throws IOException {
 			output.writeByte((byte) packet.nextState.ordinal());
@@ -29,7 +27,7 @@ public record HandshakePacket(
 
 		@Override
 		public HandshakePacket deserialize(BufferReader input) throws IOException {
-			final var nextState = values[input.readByte()];
+			final var nextState = ConnectionState.valueOf(input.readByte());
 
 			return new HandshakePacket(nextState);
 		}

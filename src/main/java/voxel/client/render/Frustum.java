@@ -3,7 +3,7 @@ package voxel.client.render;
 import org.joml.Vector3f;
 
 import voxel.client.Settings;
-import voxel.client.chunk.Chunk;
+import voxel.client.chunk.ClientChunk;
 
 public class Frustum {
 
@@ -25,7 +25,7 @@ public class Frustum {
 		tanY = Math.tan(halfY);
 	}
 
-	public boolean contains(Chunk chunk) {
+	public boolean contains(ClientChunk chunk) {
 		var sphereVector = new Vector3f(chunk.getCenter()).sub(camera.getPosition());
 
 		var sphereZ = sphereVector.dot(camera.getForward());

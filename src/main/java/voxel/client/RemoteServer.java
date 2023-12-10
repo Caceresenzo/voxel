@@ -8,8 +8,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ArrayBlockingQueue;
 
-import org.joml.Vector3i;
-
 import lombok.Getter;
 import voxel.client.player.LocalPlayer;
 import voxel.client.player.RemotePlayer;
@@ -30,7 +28,6 @@ import voxel.networking.packet.clientbound.status.StatusResponsePacket;
 import voxel.networking.packet.serverbound.handshake.HandshakePacket;
 import voxel.networking.packet.serverbound.login.LoginAcknowledgedPacket;
 import voxel.networking.packet.serverbound.login.LoginStartPacket;
-import voxel.shared.chunk.ChunkKey;
 import voxel.util.DoubleBufferedBlockingQueue;
 
 public class RemoteServer extends Remote implements ClientBoundPacketHandler<RemoteServer> {
@@ -123,24 +120,26 @@ public class RemoteServer extends Remote implements ClientBoundPacketHandler<Rem
 
 	@Override
 	public void onBlockUpdate(RemoteServer remote, BlockUpdatePacket packet) {
-		final var blockPosition = new Vector3i(packet.x(), packet.y(), packet.z());
+		final var blockPosition = packet.position();
+		final var chunkPosition = blockPosition.toChunkPosition();
 
-		final var chunk = player.getWorld().getChunkAt(blockPosition);
+		final var chunk = player.getWorld().getChunk(chunkPosition);
 		if (chunk == null) {
 			return;
 		}
 
-		final var localPosition = VoxelHandler.worldToLocal(blockPosition, chunk.getPosition());
+		final var localPosition = blockPosition.toLocalPosition(chunkPosition);
 
-		chunk.setVoxel(localPosition.x, localPosition.y, localPosition.z, packet.id());
+		chunk.setVoxel(localPosition, packet.id());
 		gameState.getVoxelHandler().rebuildAdjacentChunks(chunk, localPosition);
 	}
 
 	@Override
 	public void onChunkData(RemoteServer remote, ChunkDataPacket packet) {
-		final var key = new ChunkKey(packet.x(), packet.y(), packet.z());
-		final var chunk = player.getWorld().getChunkManager().load(key);
-		chunk.setVoxels(packet.voxelIds());
+		final var chunkPosition = packet.position();
+		final var chunk = player.getWorld().getChunkManager().load(chunkPosition);
+
+		chunk.setVoxels(packet.voxels());
 	}
 
 	@Override
