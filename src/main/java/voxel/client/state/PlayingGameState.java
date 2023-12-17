@@ -5,10 +5,7 @@ import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_RIGHT;
 import static org.lwjgl.glfw.GLFW.GLFW_PRESS;
 import static org.lwjgl.glfw.GLFW.glfwSetMouseButtonCallback;
 
-import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
-
-import org.joml.Vector3f;
 
 import lombok.Getter;
 import lombok.SneakyThrows;
@@ -18,7 +15,6 @@ import opengl.texture.ImageData;
 import opengl.texture.Texture;
 import voxel.client.Game;
 import voxel.client.RemoteServer;
-import voxel.client.Settings;
 import voxel.client.VoxelHandler;
 import voxel.client.chunk.ChunkShaderProgram;
 import voxel.client.crosshair.CrossHair;
@@ -28,7 +24,6 @@ import voxel.client.marker.Marker;
 import voxel.client.marker.MarkerMesh;
 import voxel.client.marker.MarkerShaderProgram;
 import voxel.client.player.LocalPlayer;
-import voxel.client.player.Player;
 import voxel.client.player.PlayerMesh;
 import voxel.client.player.PlayerShaderProgram;
 import voxel.client.skybox.SkyBox;
@@ -200,45 +195,8 @@ public class PlayingGameState implements GameState {
 		playerTexture.activate(0);
 		playerShaderProgram.texture.load(0);
 
-		playerMesh.render(new Player() {
-
-			@Override
-			public float getYaw() {
-				return player.getYaw();
-				//				return -90f;
-			}
-
-			@Override
-			public World getWorld() {
-				return null;
-			}
-
-			@Override
-			public UUID getUUID() {
-				return null;
-			}
-
-			@Override
-			public Vector3f getPosition() {
-				return Settings.PLAYER_POSITION;
-			}
-
-			@Override
-			public float getPitch() {
-				return player.getPitch();
-				//				return 0f;
-			}
-
-			@Override
-			public String getLogin() {
-				return null;
-			}
-
-		});
-
-		texture.activate(0);
 		for (final var otherPlayer : server.getOtherPlayers()) {
-			otherPlayer.render(markerShaderProgram, player);
+			playerMesh.render(otherPlayer);
 		}
 
 		crossHair.render();
