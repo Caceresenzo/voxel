@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.List;
 
 import org.joml.Matrix4f;
+import org.joml.Quaternionf;
+import org.joml.Vector3fc;
 
 import it.unimi.dsi.fastutil.floats.FloatList;
 import opengl.mesh.MeshException;
@@ -25,11 +27,19 @@ public class PlayerMesh {
 	}
 
 	public void render(Player player) {
+		render(player.getPosition(), player.getYaw(), player.getPitch());
+	}
+
+	public void render(Vector3fc position, float yaw, float pitch) {
 		modelMatrix.identity()
-			.translate(player.getPosition())
+			.translate(position)
 			.scale(0.3f)
-			.rotateX(player.getPitch())
-			.rotateZ(player.getYaw());
+			.rotate(
+				/* TODO Math.toRadians */
+				new Quaternionf()
+					.rotateY(-yaw)
+					.rotateZ(pitch)
+			);
 
 		shaderProgram.use();
 		shaderProgram.model.load(modelMatrix);

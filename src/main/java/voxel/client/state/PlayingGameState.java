@@ -5,7 +5,10 @@ import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_RIGHT;
 import static org.lwjgl.glfw.GLFW.GLFW_PRESS;
 import static org.lwjgl.glfw.GLFW.glfwSetMouseButtonCallback;
 
+import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
+
+import org.joml.Vector3f;
 
 import lombok.Getter;
 import lombok.SneakyThrows;
@@ -24,6 +27,7 @@ import voxel.client.marker.Marker;
 import voxel.client.marker.MarkerMesh;
 import voxel.client.marker.MarkerShaderProgram;
 import voxel.client.player.LocalPlayer;
+import voxel.client.player.Player;
 import voxel.client.player.PlayerMesh;
 import voxel.client.player.PlayerShaderProgram;
 import voxel.client.skybox.SkyBox;
@@ -198,6 +202,12 @@ public class PlayingGameState implements GameState {
 		for (final var otherPlayer : server.getOtherPlayers()) {
 			playerMesh.render(otherPlayer);
 		}
+
+		//		playerMesh.render(
+		//			player.getPosition().add(player.getForward().mul(4, new Vector3f()), new Vector3f()),
+		//			player.getYaw(),
+		//			player.getPitch()
+		//		);
 
 		crossHair.render();
 
