@@ -6,8 +6,7 @@ import static org.lwjgl.opengl.GL11.glDepthFunc;
 
 import java.awt.Color;
 
-import opengl.vertex.BufferType;
-import opengl.vertex.UsageType;
+import opengl.vertex.BufferUsage;
 import opengl.vertex.VertexArray;
 import opengl.vertex.VertexBuffer;
 import voxel.client.Settings;
@@ -68,7 +67,7 @@ public class SkyBoxMesh {
 			+1.0f, -1.0f, +1.0f
 		};
 
-		final var buffer = new VertexBuffer(BufferType.ARRAY, UsageType.STATIC_DRAW);
+		final var buffer = VertexBuffer.ofArray(BufferUsage.STATIC_DRAW);
 		buffer.store(vertices);
 
 		final var array = new VertexArray(shaderProgram);

@@ -20,6 +20,7 @@ import java.nio.DoubleBuffer;
 import java.util.UUID;
 
 import org.joml.Vector2i;
+import org.joml.Vector3f;
 import org.lwjgl.system.MemoryStack;
 
 import lombok.Getter;
@@ -36,7 +37,7 @@ public class LocalPlayer extends Camera implements Player {
 	private Vector2i lastPosition;
 
 	public LocalPlayer(UUID uuid, String login) {
-		super(Settings.PLAYER_POSITION, -90, 0);
+		super(new Vector3f(Settings.PLAYER_POSITION), -90, 0);
 
 		this.uuid = uuid;
 		this.login = login;

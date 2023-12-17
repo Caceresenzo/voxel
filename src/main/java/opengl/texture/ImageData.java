@@ -23,12 +23,32 @@ public class ImageData {
 		return 4;
 	}
 
-	public static ImageData load(InputStream inputStream, boolean flip) throws IOException {
+	public static ImageData load(InputStream inputStream, boolean horizontalFlip) throws IOException {
+		return load(inputStream, horizontalFlip, false);
+	}
+
+	public static ImageData load(InputStream inputStream, boolean horizontalFlip, boolean verticalFlip) throws IOException {
 		var image = ImageIO.read(inputStream);
 
-		if (flip) {
-			final var transform = AffineTransform.getScaleInstance(-1, 1);
-			transform.translate(-image.getWidth(null), 0);
+		if (horizontalFlip || verticalFlip) {
+			var sizeX = 1;
+			var sizeY = 1;
+			var width = 0;
+			var height = 0;
+
+			if (horizontalFlip) {
+				sizeX = -1;
+				width = 0;
+				width = -image.getWidth(null);
+			}
+
+			if (verticalFlip) {
+				sizeY = -1;
+				height = -image.getHeight(null);
+			}
+
+			final var transform = AffineTransform.getScaleInstance(sizeX, sizeY);
+			transform.translate(width, height);
 
 			final var opeartion = new AffineTransformOp(transform, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
 			image = opeartion.filter(image, null);

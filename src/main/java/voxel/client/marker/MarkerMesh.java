@@ -6,8 +6,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.joml.Matrix4f;
 import org.joml.Vector3i;
 
-import opengl.vertex.BufferType;
-import opengl.vertex.UsageType;
+import opengl.vertex.BufferUsage;
 import opengl.vertex.VertexArray;
 import opengl.vertex.VertexBuffer;
 import voxel.client.render.Camera;
@@ -36,10 +35,10 @@ public class MarkerMesh {
 	private void createVertexArray() {
 		final var vertexData = getVertexData();
 
-		final var textureCoordinatesBuffer = new VertexBuffer(BufferType.ARRAY, UsageType.STATIC_DRAW);
+		final var textureCoordinatesBuffer = VertexBuffer.ofArray(BufferUsage.STATIC_DRAW);
 		textureCoordinatesBuffer.store(vertexData.getLeft());
 
-		final var positionsBuffer = new VertexBuffer(BufferType.ARRAY, UsageType.STATIC_DRAW);
+		final var positionsBuffer = VertexBuffer.ofArray(BufferUsage.STATIC_DRAW);
 		positionsBuffer.store(vertexData.getRight());
 
 		final var array = new VertexArray(shaderProgram);

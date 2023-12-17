@@ -1,6 +1,7 @@
 package opengl.vertex;
 
 import static org.lwjgl.opengl.GL11.glDrawArrays;
+import static org.lwjgl.opengl.GL11.glDrawElements;
 import static org.lwjgl.opengl.GL30.glBindVertexArray;
 import static org.lwjgl.opengl.GL30.glDeleteVertexArrays;
 import static org.lwjgl.opengl.GL30.glGenVertexArrays;
@@ -12,6 +13,7 @@ import java.util.List;
 import lombok.Getter;
 import opengl.OpenGL;
 import opengl.draw.BeginMode;
+import opengl.shader.DataType;
 import opengl.shader.ShaderProgram;
 import opengl.shader.variable.attribute.Attribute;
 
@@ -23,6 +25,7 @@ public class VertexArray {
 	private final List<VertexBuffer> buffers;
 	private final Cleanable cleanable;
 	private @Getter int verticesCount;
+	private IndiceVertexBuffer indicesBuffer;
 
 	public VertexArray(ShaderProgram shaderProgram) {
 		this(shaderProgram, BeginMode.TRIANGLES);
@@ -49,21 +52,23 @@ public class VertexArray {
 		return this;
 	}
 
-	public VertexArray add(VertexBuffer buffer) {
+	public VertexArray add(ArrayVertexBuffer buffer) {
 		return add(buffer, shaderProgram.getAttributes());
 	}
 
-	public VertexArray add(VertexBuffer buffer, List<Attribute> attributes) {
-		shaderProgram.use();
+	public VertexArray add(ArrayVertexBuffer buffer, List<Attribute> attributes) {
 		bind();
 		buffer.bind();
 
 		{
 			final var stride = Attribute.sumStride(attributes);
+			final var sizeInBytes = buffer.getSizeInBytes();
 
-			if (buffer.getSizeInBytes() % stride != 0) {
-				throw new IllegalArgumentException("invalid stride of %s for buffer size (in bytes) of %s".formatted(stride, buffer.getSizeInBytes()));
+			if (sizeInBytes % stride != 0) {
+				throw new IllegalArgumentException("invalid stride of %s for buffer size (in bytes) of %s, buffer size (in array length) %s".formatted(stride, sizeInBytes, buffer.getSize()));
 			}
+
+			shaderProgram.use();
 
 			var offset = 0;
 			for (final var attribute : attributes) {
@@ -71,13 +76,34 @@ public class VertexArray {
 				offset += attribute.getStride();
 			}
 
+			shaderProgram.unuse();
+
+			if (indicesBuffer == null) {
+				verticesCount += sizeInBytes / stride;
+			}
+
 			buffers.add(buffer);
-			verticesCount += buffer.getSizeInBytes() / stride;
 		}
 
 		buffer.unbind();
 		unbind();
-		shaderProgram.unuse();
+
+		return this;
+	}
+
+	public VertexArray add(IndiceVertexBuffer buffer) {
+		bind();
+		buffer.bind();
+
+		{
+			indicesBuffer = buffer;
+			verticesCount = buffer.getSize();
+
+			buffers.add(buffer);
+		}
+
+		buffer.unbind();
+		unbind();
 
 		return this;
 	}
@@ -86,7 +112,13 @@ public class VertexArray {
 		shaderProgram.use();
 		bind();
 
-		glDrawArrays(beginMode.getValue(), 0, verticesCount);
+		if (indicesBuffer != null) {
+			indicesBuffer.bind();
+			glDrawElements(beginMode.getValue(), verticesCount, DataType.UNSIGNED_INTEGER.value(), 0);
+			indicesBuffer.unbind();
+		} else {
+			glDrawArrays(beginMode.getValue(), 0, verticesCount);
+		}
 
 		unbind();
 		shaderProgram.unuse();

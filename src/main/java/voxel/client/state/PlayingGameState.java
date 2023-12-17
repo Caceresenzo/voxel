@@ -5,7 +5,10 @@ import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_RIGHT;
 import static org.lwjgl.glfw.GLFW.GLFW_PRESS;
 import static org.lwjgl.glfw.GLFW.glfwSetMouseButtonCallback;
 
+import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
+
+import org.joml.Vector3f;
 
 import lombok.Getter;
 import lombok.SneakyThrows;
@@ -15,6 +18,7 @@ import opengl.texture.ImageData;
 import opengl.texture.Texture;
 import voxel.client.Game;
 import voxel.client.RemoteServer;
+import voxel.client.Settings;
 import voxel.client.VoxelHandler;
 import voxel.client.chunk.ChunkShaderProgram;
 import voxel.client.crosshair.CrossHair;
@@ -24,6 +28,9 @@ import voxel.client.marker.Marker;
 import voxel.client.marker.MarkerMesh;
 import voxel.client.marker.MarkerShaderProgram;
 import voxel.client.player.LocalPlayer;
+import voxel.client.player.Player;
+import voxel.client.player.PlayerMesh;
+import voxel.client.player.PlayerShaderProgram;
 import voxel.client.skybox.SkyBox;
 import voxel.client.skybox.SkyBoxMesh;
 import voxel.client.skybox.SkyBoxShaderProgram;
@@ -53,6 +60,10 @@ public class PlayingGameState implements GameState {
 	private CrossHairShaderProgram crossHairShaderProgram;
 	private CrossHairMesh crossHairMesh;
 	private CrossHair crossHair;
+
+	private Texture playerTexture;
+	private PlayerShaderProgram playerShaderProgram;
+	private PlayerMesh playerMesh;
 
 	public PlayingGameState(LocalPlayer player, RemoteServer server) {
 		this.player = player;
@@ -103,6 +114,16 @@ public class PlayingGameState implements GameState {
 		crossHairShaderProgram = CrossHairShaderProgram.create();
 		crossHairMesh = new CrossHairMesh(crossHairShaderProgram);
 		crossHair = new CrossHair(crossHairMesh);
+
+		try (final var inputStream = getClass().getResourceAsStream("/textures/steve.png")) {
+			final var steveImageData = ImageData.load(inputStream, false, true);
+			playerTexture = Texture.create(steveImageData);
+		}
+
+		playerShaderProgram = PlayerShaderProgram.create();
+		playerShaderProgram.use();
+		playerShaderProgram.projection.load(player.getProjection());
+		playerMesh = PlayerMesh.create(playerShaderProgram);
 
 		glfwSetMouseButtonCallback(Game.window, (window, button, action, mods) -> {
 			if (voxelHandler == null) {
@@ -160,6 +181,8 @@ public class PlayingGameState implements GameState {
 
 	@Override
 	public void render() {
+		skyBox.render(player, System.currentTimeMillis());
+
 		atlas.activate(0);
 		chunkShaderProgram.use();
 		chunkShaderProgram.view.load(player.getView());
@@ -172,13 +195,53 @@ public class PlayingGameState implements GameState {
 			marker.render(player, voxelHandler);
 		}
 
+		playerShaderProgram.use();
+		playerShaderProgram.view.load(player.getView());
+		playerTexture.activate(0);
+		playerShaderProgram.texture.load(0);
+
+		playerMesh.render(new Player() {
+
+			@Override
+			public float getYaw() {
+				return player.getYaw();
+				//				return -90f;
+			}
+
+			@Override
+			public World getWorld() {
+				return null;
+			}
+
+			@Override
+			public UUID getUUID() {
+				return null;
+			}
+
+			@Override
+			public Vector3f getPosition() {
+				return Settings.PLAYER_POSITION;
+			}
+
+			@Override
+			public float getPitch() {
+				return player.getPitch();
+				//				return 0f;
+			}
+
+			@Override
+			public String getLogin() {
+				return null;
+			}
+
+		});
+
 		texture.activate(0);
 		for (final var otherPlayer : server.getOtherPlayers()) {
 			otherPlayer.render(markerShaderProgram, player);
 		}
 
 		crossHair.render();
-		skyBox.render(player, System.currentTimeMillis());
 
 		OpenGL.checkErrors();
 	}

@@ -2,8 +2,7 @@ package voxel.client.chunk;
 
 import org.joml.Vector3i;
 
-import opengl.vertex.BufferType;
-import opengl.vertex.UsageType;
+import opengl.vertex.BufferUsage;
 import opengl.vertex.VertexArray;
 import opengl.vertex.VertexBuffer;
 import voxel.client.Settings;
@@ -33,7 +32,7 @@ public class ChunkMeshBuilder {
 	public ChunkMesh build() {
 		final var vertexData = getVertexData();
 
-		final var buffer = new VertexBuffer(BufferType.ARRAY, UsageType.STATIC_DRAW);
+		final var buffer = VertexBuffer.ofArray(BufferUsage.STATIC_DRAW);
 		buffer.store(vertexData);
 
 		final var array = new VertexArray(chunk.getShaderProgram());

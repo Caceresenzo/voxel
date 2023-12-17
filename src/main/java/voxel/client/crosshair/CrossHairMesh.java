@@ -1,8 +1,7 @@
 package voxel.client.crosshair;
 
 import opengl.draw.BeginMode;
-import opengl.vertex.BufferType;
-import opengl.vertex.UsageType;
+import opengl.vertex.BufferUsage;
 import opengl.vertex.VertexArray;
 import opengl.vertex.VertexBuffer;
 
@@ -20,7 +19,7 @@ public class CrossHairMesh {
 	private void createVertexArray() {
 		final var vertexData = getVertexData();
 
-		final var buffer = new VertexBuffer(BufferType.ARRAY, UsageType.STATIC_DRAW);
+		final var buffer = VertexBuffer.ofArray(BufferUsage.STATIC_DRAW);
 		buffer.store(vertexData);
 
 		final var array = new VertexArray(shaderProgram, BeginMode.LINES);

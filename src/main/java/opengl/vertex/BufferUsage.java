@@ -9,7 +9,7 @@ import opengl.OpenGLConstant;
 
 @Getter
 @RequiredArgsConstructor
-public enum UsageType implements OpenGLConstant {
+public enum BufferUsage implements OpenGLConstant {
 
 	STATIC_DRAW(GL_STATIC_DRAW),
 	DYNAMIC_DRAW(GL_DYNAMIC_DRAW);

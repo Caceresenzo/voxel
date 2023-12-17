@@ -9,7 +9,7 @@ import opengl.OpenGLConstant;
 
 @Getter
 @RequiredArgsConstructor
-public enum BufferType implements OpenGLConstant {
+public enum BufferBindTarget implements OpenGLConstant {
 
 	ARRAY(GL_ARRAY_BUFFER),
 	ELEMENT_ARRAY(GL_ELEMENT_ARRAY_BUFFER);
