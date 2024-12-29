@@ -43,6 +43,11 @@ public class LocalPlayer extends Camera implements Player {
 		this.login = login;
 	}
 
+	@Override
+	public void move(float x, float y, float z, float yaw, float pitch) {
+		move(x, y, z, yaw, pitch, false);
+	}
+
 	public boolean handleMouvement() {
 		final var moved = handleKeyboard();
 		final var rotated = handleMouse();

@@ -29,6 +29,7 @@ public class RemotePlayer implements Player {
 		return uuid;
 	}
 
+	@Override
 	public void move(float x, float y, float z, float yaw, float pitch) {
 		this.position.x = x;
 		this.position.y = y;

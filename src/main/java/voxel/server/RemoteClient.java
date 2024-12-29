@@ -34,11 +34,10 @@ public class RemoteClient extends Remote {
 	}
 
 	@Override
-	public void onPacketSent(Packet packet) {
-	}
+	public void onPacketSent(Packet packet) {}
 
-	void setState(ConnectionState state) {
-		this.state = state;
+	void setConnectionState(ConnectionState state) {
+		this.connectionState = state;
 	}
 
 }

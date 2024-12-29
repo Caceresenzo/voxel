@@ -5,6 +5,7 @@ import voxel.networking.packet.Packet;
 import voxel.networking.packet.serverbound.handshake.HandshakePacket;
 import voxel.networking.packet.serverbound.login.LoginAcknowledgedPacket;
 import voxel.networking.packet.serverbound.login.LoginStartPacket;
+import voxel.networking.packet.serverbound.other.ConfirmTeleportationPacket;
 import voxel.networking.packet.serverbound.other.PingPacket;
 import voxel.networking.packet.serverbound.play.PlayerActionPacket;
 import voxel.networking.packet.serverbound.play.SetPlayerPositionAndRotationPacket;
@@ -23,10 +24,12 @@ public interface ServerBoundPacketHandler<T extends Remote> {
 
 	void onLoginAcknowledged(T remote, LoginAcknowledgedPacket packet);
 
+	void onConfirmTeleportation(T remote, ConfirmTeleportationPacket packet);
+
 	void onPlayerAction(T remote, PlayerActionPacket packet);
-	
+
 	void onSetPlayerPositionAndRotation(T remote, SetPlayerPositionAndRotationPacket packet);
-	
+
 	void onUseItemOn(T remote, UseItemOnPacket packet);
 
 	public static <T extends Remote> boolean dispatch(ServerBoundPacketHandler<T> handler, T remote, Packet packet) {
@@ -55,16 +58,21 @@ public interface ServerBoundPacketHandler<T extends Remote> {
 			return true;
 		}
 
+		if (packet instanceof ConfirmTeleportationPacket packet_) {
+			handler.onConfirmTeleportation(remote, packet_);
+			return true;
+		}
+
 		if (packet instanceof PlayerActionPacket packet_) {
 			handler.onPlayerAction(remote, packet_);
 			return true;
 		}
-		
+
 		if (packet instanceof SetPlayerPositionAndRotationPacket packet_) {
 			handler.onSetPlayerPositionAndRotation(remote, packet_);
 			return true;
 		}
-		
+
 		if (packet instanceof UseItemOnPacket packet_) {
 			handler.onUseItemOn(remote, packet_);
 			return true;

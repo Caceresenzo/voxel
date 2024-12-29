@@ -6,8 +6,11 @@ import voxel.networking.packet.clientbound.login.LoginSuccessPacket;
 import voxel.networking.packet.clientbound.other.PongPacket;
 import voxel.networking.packet.clientbound.play.BlockUpdatePacket;
 import voxel.networking.packet.clientbound.play.ChunkDataPacket;
+import voxel.networking.packet.clientbound.play.GameEventPacket;
 import voxel.networking.packet.clientbound.play.LoginPacket;
 import voxel.networking.packet.clientbound.play.PlayerInfoUpdatePacket;
+import voxel.networking.packet.clientbound.play.SetCenterChunkPacket;
+import voxel.networking.packet.clientbound.play.SynchronizePlayerPositionPacket;
 import voxel.networking.packet.clientbound.play.UpdateEntityPositionAndRotationPacket;
 import voxel.networking.packet.clientbound.status.StatusResponsePacket;
 
@@ -25,7 +28,13 @@ public interface ClientBoundPacketHandler<T extends Remote> {
 
 	void onChunkData(T remote, ChunkDataPacket packet);
 
+	void onGameEvent(T remote, GameEventPacket packet);
+
 	void onPlayerInfoUpdate(T remote, PlayerInfoUpdatePacket packet);
+
+	void onSetCenterChunk(T remote, SetCenterChunkPacket packet);
+
+	void onSynchronizePlayerPosition(T remote, SynchronizePlayerPositionPacket packet);
 
 	void onUpdateEntityPositionAndRotation(T remote, UpdateEntityPositionAndRotationPacket packet);
 
@@ -54,14 +63,29 @@ public interface ClientBoundPacketHandler<T extends Remote> {
 			handler.onBlockUpdate(remote, packet_);
 			return true;
 		}
-		
+
 		if (packet instanceof ChunkDataPacket packet_) {
 			handler.onChunkData(remote, packet_);
 			return true;
 		}
 
+		if (packet instanceof GameEventPacket packet_) {
+			handler.onGameEvent(remote, packet_);
+			return true;
+		}
+
 		if (packet instanceof PlayerInfoUpdatePacket packet_) {
 			handler.onPlayerInfoUpdate(remote, packet_);
+			return true;
+		}
+
+		if (packet instanceof SetCenterChunkPacket packet_) {
+			handler.onSetCenterChunk(remote, packet_);
+			return true;
+		}
+
+		if (packet instanceof SynchronizePlayerPositionPacket packet_) {
+			handler.onSynchronizePlayerPosition(remote, packet_);
 			return true;
 		}
 

@@ -24,7 +24,7 @@ public abstract class Remote {
 	public static final int MAX_PACKET_QUEUE_SIZE = 1024 * 8;
 
 	private final Socket socket;
-	protected @Getter ConnectionState state = ConnectionState.HANDSHAKE;
+	protected @Getter ConnectionState connectionState = ConnectionState.HANDSHAKE;
 
 	private final PacketRegistry readPacketRegistry;
 	private final Thread readThread;
@@ -97,9 +97,9 @@ public abstract class Remote {
 					final var packetId = inputStream.readInt();
 					inputStream.read(readBuffer, 0, length);
 
-					final var identifier = writePacketRegistry.get(state, packetId);
+					final var identifier = writePacketRegistry.get(connectionState, packetId);
 					if (identifier == null) {
-						throw new IllegalStateException(Remote.this.getClass().getSimpleName() + ": " + packetId + " is not registered in " + state + " remote registry");
+						throw new IllegalStateException(Remote.this.getClass().getSimpleName() + ": " + packetId + " is not registered in " + connectionState + " remote registry");
 					}
 
 					final PacketSerializer deserializer = identifier.serializer();
@@ -135,9 +135,9 @@ public abstract class Remote {
 						continue;
 					}
 
-					final var identifier = readPacketRegistry.get(state, packet.getClass());
+					final var identifier = readPacketRegistry.get(connectionState, packet.getClass());
 					if (identifier == null) {
-						throw new IllegalStateException(Remote.this.getClass().getSimpleName() + ": " + packet.getClass().getSimpleName() + " is not registered in " + state + " local registry");
+						throw new IllegalStateException(Remote.this.getClass().getSimpleName() + ": " + packet.getClass().getSimpleName() + " is not registered in " + connectionState + " local registry");
 					}
 
 					final PacketSerializer serializer = identifier.serializer();

@@ -22,7 +22,7 @@ public class World {
 		return chunkManager.get(key);
 	}
 
-	public void loadSpawnChunks(int radius) {
+	public void loadSpawnChunks(int radius, int height) {
 //		getChunk(new ChunkPosition(0, 0, 0)).load();
 //		getChunk(new ChunkPosition(0, 1, 0)).load();
 
@@ -30,7 +30,7 @@ public class World {
 			final var key = ChunkPosition.zero();
 			getChunk(key).load();
 		} else {
-			for (var y = 0; y <= radius; ++y) {
+			for (var y = 0; y <= height; ++y) {
 				for (var x = -radius; x <= radius; ++x) {
 					for (var z = -radius; z <= radius; ++z) {
 						final var key = new ChunkPosition(x, y, z);

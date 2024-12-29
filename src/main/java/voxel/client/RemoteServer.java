@@ -21,13 +21,17 @@ import voxel.networking.packet.clientbound.login.LoginSuccessPacket;
 import voxel.networking.packet.clientbound.other.PongPacket;
 import voxel.networking.packet.clientbound.play.BlockUpdatePacket;
 import voxel.networking.packet.clientbound.play.ChunkDataPacket;
+import voxel.networking.packet.clientbound.play.GameEventPacket;
 import voxel.networking.packet.clientbound.play.LoginPacket;
 import voxel.networking.packet.clientbound.play.PlayerInfoUpdatePacket;
+import voxel.networking.packet.clientbound.play.SetCenterChunkPacket;
+import voxel.networking.packet.clientbound.play.SynchronizePlayerPositionPacket;
 import voxel.networking.packet.clientbound.play.UpdateEntityPositionAndRotationPacket;
 import voxel.networking.packet.clientbound.status.StatusResponsePacket;
 import voxel.networking.packet.serverbound.handshake.HandshakePacket;
 import voxel.networking.packet.serverbound.login.LoginAcknowledgedPacket;
 import voxel.networking.packet.serverbound.login.LoginStartPacket;
+import voxel.networking.packet.serverbound.other.ConfirmTeleportationPacket;
 import voxel.util.DoubleBufferedBlockingQueue;
 
 public class RemoteServer extends Remote implements ClientBoundPacketHandler<RemoteServer> {
@@ -53,12 +57,12 @@ public class RemoteServer extends Remote implements ClientBoundPacketHandler<Rem
 	}
 
 	public void setState(ConnectionState state) {
-		this.state = state;
+		this.connectionState = state;
 	}
 
 	@Override
 	public void onPacketReceived(Packet packet) {
-		if (ConnectionState.PLAY.equals(state)) {
+		if (ConnectionState.PLAY.equals(connectionState)) {
 			readQueue.add(packet);
 		} else {
 			dispatch(packet);
@@ -68,9 +72,9 @@ public class RemoteServer extends Remote implements ClientBoundPacketHandler<Rem
 	@Override
 	public void onPacketSent(Packet packet) {
 		if (packet instanceof HandshakePacket packet_) {
-			state = packet_.nextState();
+			connectionState = packet_.nextState();
 		} else if (packet instanceof LoginAcknowledgedPacket) {
-			state = ConnectionState.PLAY;
+			connectionState = ConnectionState.PLAY;
 		}
 	}
 
@@ -143,6 +147,11 @@ public class RemoteServer extends Remote implements ClientBoundPacketHandler<Rem
 	}
 
 	@Override
+	public void onGameEvent(RemoteServer remote, GameEventPacket packet) {
+		System.out.println(packet);
+	}
+
+	@Override
 	public void onPlayerInfoUpdate(RemoteServer remote, PlayerInfoUpdatePacket packet) {
 		final var actionMask = packet.actionMask();
 
@@ -163,6 +172,18 @@ public class RemoteServer extends Remote implements ClientBoundPacketHandler<Rem
 				// TODO
 			}
 		}
+	}
+
+	@Override
+	public void onSetCenterChunk(RemoteServer remote, SetCenterChunkPacket packet) {
+		System.out.println(packet);
+	}
+
+	@Override
+	public void onSynchronizePlayerPosition(RemoteServer remote, SynchronizePlayerPositionPacket packet) {
+		player.move(packet.x(), packet.y(), packet.z(), packet.yaw(), packet.pitch());
+
+		offer(new ConfirmTeleportationPacket(packet.teleportId()));
 	}
 
 	@Override

@@ -10,6 +10,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import voxel.server.RemoteClient;
+import voxel.shared.chunk.ChunkPosition;
 
 @RequiredArgsConstructor
 public class Player {
@@ -36,10 +37,27 @@ public class Player {
 	@Setter
 	private float pitch;
 
-	public void updateLocation(Vector3fc position, float yaw, float pitch) {
+	@Getter
+	@NonNull
+	private ChunkPosition centerChunkPosition = ChunkPosition.zero();
+
+	public boolean updateLocation(Vector3fc position, float yaw, float pitch) {
 		this.position.set(position);
 		this.yaw = yaw;
 		this.pitch = pitch;
+
+		return updateCenterChunkPosition();
+	}
+
+	private boolean updateCenterChunkPosition() {
+		final var newPosition = ChunkPosition.fromAbsolute(position);
+
+		if (newPosition.equals(centerChunkPosition)) {
+			return false;
+		}
+
+		centerChunkPosition = newPosition;
+		return true;
 	}
 
 }

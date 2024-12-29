@@ -4,7 +4,10 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -17,24 +20,29 @@ import voxel.networking.packet.clientbound.login.LoginSuccessPacket;
 import voxel.networking.packet.clientbound.other.PongPacket;
 import voxel.networking.packet.clientbound.play.BlockUpdatePacket;
 import voxel.networking.packet.clientbound.play.ChunkDataPacket;
+import voxel.networking.packet.clientbound.play.GameEventPacket;
 import voxel.networking.packet.clientbound.play.LoginPacket;
 import voxel.networking.packet.clientbound.play.PlayerInfoUpdatePacket;
+import voxel.networking.packet.clientbound.play.SetCenterChunkPacket;
+import voxel.networking.packet.clientbound.play.SynchronizePlayerPositionPacket;
 import voxel.networking.packet.clientbound.play.UpdateEntityPositionAndRotationPacket;
 import voxel.networking.packet.clientbound.status.StatusResponsePacket;
 import voxel.networking.packet.serverbound.ServerBoundPacketHandler;
 import voxel.networking.packet.serverbound.handshake.HandshakePacket;
 import voxel.networking.packet.serverbound.login.LoginAcknowledgedPacket;
 import voxel.networking.packet.serverbound.login.LoginStartPacket;
+import voxel.networking.packet.serverbound.other.ConfirmTeleportationPacket;
 import voxel.networking.packet.serverbound.other.PingPacket;
 import voxel.networking.packet.serverbound.play.PlayerActionPacket;
 import voxel.networking.packet.serverbound.play.SetPlayerPositionAndRotationPacket;
 import voxel.networking.packet.serverbound.play.UseItemOnPacket;
 import voxel.networking.packet.serverbound.status.StatusRequestPacket;
-import voxel.server.chunk.ServerChunk;
 import voxel.server.chunk.generator.SimplexNoiseChunkGenerator;
 import voxel.server.player.Player;
 import voxel.server.world.World;
 import voxel.server.world.WorldCreator;
+import voxel.shared.chunk.Chunk;
+import voxel.shared.chunk.ChunkPosition;
 import voxel.util.DoubleBufferedBlockingQueue;
 
 public class Server implements ServerBoundPacketHandler<RemoteClient> {
@@ -54,12 +62,14 @@ public class Server implements ServerBoundPacketHandler<RemoteClient> {
 	private ConnectionAcceptor networkServer;
 	private boolean running;
 
+	private ConcurrentMap<UUID, PendingTeleport> pendingTeleports = new ConcurrentHashMap<>();
+
 	public Server(String name) {
 		this.name = name;
 	}
 
 	public void start(ConnectionAcceptor networkServer) {
-		world.loadSpawnChunks(3);
+		world.loadSpawnChunks(10, 3);
 
 		this.networkServer = networkServer;
 		this.networkServer.start(this);
@@ -84,7 +94,7 @@ public class Server implements ServerBoundPacketHandler<RemoteClient> {
 	}
 
 	public void onPacketReceived(RemoteClient remote, Packet packet) {
-		if (ConnectionState.PLAY.equals(remote.getState())) {
+		if (ConnectionState.PLAY.equals(remote.getConnectionState())) {
 			readPacketQueue.add(Pair.of(remote, packet));
 		} else {
 			dispatch(remote, packet);
@@ -111,7 +121,7 @@ public class Server implements ServerBoundPacketHandler<RemoteClient> {
 
 	@Override
 	public void onHandshake(RemoteClient remote, HandshakePacket packet) {
-		remote.setState(packet.nextState());
+		remote.setConnectionState(packet.nextState());
 	}
 
 	@Override
@@ -139,50 +149,73 @@ public class Server implements ServerBoundPacketHandler<RemoteClient> {
 
 	@Override
 	public void onLoginAcknowledged(RemoteClient remote, LoginAcknowledgedPacket packet) {
-		remote.setState(ConnectionState.PLAY);
+		remote.setConnectionState(ConnectionState.PLAY);
 
 		remote.offer(new LoginPacket(world.getName()));
 
-		final var mask = (byte) (PlayerInfoUpdatePacket.Action.ADD_PLAYER.bit() | PlayerInfoUpdatePacket.Action.UPDATE_LATENCY.bit());
+		synchronizePosition(remote, () -> {
+			final var mask = (byte) (PlayerInfoUpdatePacket.Action.ADD_PLAYER.bit() | PlayerInfoUpdatePacket.Action.UPDATE_LATENCY.bit());
 
-		final var selfPlayer = remote.getPlayer();
-		final var selfPacket = new PlayerInfoUpdatePacket(
-			mask,
-			Collections.singletonList(new PlayerInfoUpdatePacket.PlayerData(selfPlayer.getUuid(), selfPlayer.getLogin(), remote.getLatency()))
-		);
+			final var selfPlayer = remote.getPlayer();
+			final var selfPacket = new PlayerInfoUpdatePacket(
+				mask,
+				Collections.singletonList(new PlayerInfoUpdatePacket.PlayerData(selfPlayer.getUuid(), selfPlayer.getLogin(), remote.getLatency()))
+			);
 
-		final var playerDatas = new ArrayList<PlayerInfoUpdatePacket.PlayerData>(players.size());
+			final var playerDatas = new ArrayList<PlayerInfoUpdatePacket.PlayerData>(players.size());
 
-		for (final var other : players) {
-			if (other == selfPlayer) {
-				continue;
+			for (final var other : players) {
+				if (other == selfPlayer) {
+					continue;
+				}
+
+				other.getClient().offer(selfPacket);
+				playerDatas.add(new PlayerInfoUpdatePacket.PlayerData(
+					other.getUuid(),
+					other.getLogin(),
+					other.getClient().getLatency()
+				));
 			}
 
-			other.getClient().offer(selfPacket);
-			playerDatas.add(new PlayerInfoUpdatePacket.PlayerData(
-				other.getUuid(),
-				other.getLogin(),
-				other.getClient().getLatency()
-			));
-		}
+			if (!playerDatas.isEmpty()) {
+				remote.offer(new PlayerInfoUpdatePacket(mask, playerDatas));
+			}
 
-		if (!playerDatas.isEmpty()) {
-			remote.offer(new PlayerInfoUpdatePacket(mask, playerDatas));
-		}
+			remote.offer(GameEventPacket.startWaitingForLevelChunks());
+			remote.offer(new SetCenterChunkPacket(ChunkPosition.zero()));
 
-		for (final var chunk : world.getChunkManager().getAll()) {
-			final var voxelIds = new byte[ServerChunk.VOLUME];
+			for (final var chunk : world.getChunkManager().getNear(selfPlayer.getCenterChunkPosition(), 2)) {
+				final var voxelIds = new byte[Chunk.VOLUME];
 
-			for (var y = 0; y < ServerChunk.DEPTH; y++) {
-				for (var z = 0; z < ServerChunk.HEIGHT; z++) {
-					for (var x = 0; x < ServerChunk.WIDTH; x++) {
-						final var index = ServerChunk.index(x, y, z);
-						voxelIds[index] = chunk.getVoxel(x, y, z);
+				for (var y = 0; y < Chunk.DEPTH; y++) {
+					for (var z = 0; z < Chunk.HEIGHT; z++) {
+						for (var x = 0; x < Chunk.WIDTH; x++) {
+							final var index = Chunk.index(x, y, z);
+							voxelIds[index] = chunk.getVoxel(x, y, z);
+						}
 					}
 				}
-			}
 
-			remote.offer(new ChunkDataPacket(chunk.getPosition(), voxelIds));
+				remote.offer(new ChunkDataPacket(chunk.getPosition(), voxelIds));
+			}
+		});
+	}
+
+	// TODO Unsafe as removing and re-adding if necessary could leave a gap
+	@Override
+	public void onConfirmTeleportation(RemoteClient remote, ConfirmTeleportationPacket packet) {
+		final var uuid = remote.getPlayer().getUuid();
+
+		final var teleport = pendingTeleports.remove(uuid);
+		if (teleport == null) {
+			return;
+		}
+
+		final var receivedId = packet.teleportId();
+		if (teleport.id() != receivedId) {
+			pendingTeleports.put(uuid, teleport);
+		} else {
+			teleport.runnable().run();
 		}
 	}
 
@@ -212,8 +245,11 @@ public class Server implements ServerBoundPacketHandler<RemoteClient> {
 	@Override
 	public void onSetPlayerPositionAndRotation(RemoteClient remote, SetPlayerPositionAndRotationPacket packet) {
 		final var player = remote.getPlayer();
+		if (hasPendingTeleport(player.getUuid())) {
+			return;
+		}
 
-		player.updateLocation(packet.position(), packet.yaw(), packet.pitch());
+		final var chunkPositionChanged = player.updateLocation(packet.position(), packet.yaw(), packet.pitch());
 
 		final var updatePacket = new UpdateEntityPositionAndRotationPacket(
 			player.getUuid(),
@@ -228,6 +264,10 @@ public class Server implements ServerBoundPacketHandler<RemoteClient> {
 			}
 
 			other.getClient().offer(updatePacket);
+		}
+
+		if (chunkPositionChanged) {
+			remote.offer(new SetCenterChunkPacket(player.getCenterChunkPosition()));
 		}
 	}
 
@@ -255,6 +295,25 @@ public class Server implements ServerBoundPacketHandler<RemoteClient> {
 		for (final var player : players) {
 			player.getClient().offer(updatePacket);
 		}
+	}
+
+	private boolean synchronizePosition(RemoteClient remote, Runnable runnable) {
+		final var id = (int) System.currentTimeMillis();
+		final var pendingTeleport = new PendingTeleport(id, runnable);
+
+		final var player = remote.getPlayer();
+		this.pendingTeleports.put(player.getUuid(), pendingTeleport);
+
+		return remote.offer(new SynchronizePlayerPositionPacket(
+			player.getPosition(),
+			player.getYaw(),
+			player.getPitch(),
+			id
+		));
+	}
+
+	private boolean hasPendingTeleport(UUID playerUuid) {
+		return pendingTeleports.containsKey(playerUuid);
 	}
 
 }

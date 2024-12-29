@@ -1,6 +1,7 @@
 package voxel.shared.chunk;
 
 import org.joml.Vector3f;
+import org.joml.Vector3fc;
 import org.joml.Vector3ic;
 
 import voxel.shared.block.BlockPosition;
@@ -22,6 +23,15 @@ public record ChunkPosition(
 			x * Chunk.WIDTH,
 			y * Chunk.DEPTH,
 			z * Chunk.HEIGHT
+		);
+	}
+
+	// TODO Is this taking into account negative number properly? is flooring needed?
+	public static ChunkPosition fromAbsolute(Vector3fc vector) {
+		return new ChunkPosition(
+			Math.floorDiv((int) vector.x(), Chunk.WIDTH),
+			Math.floorDiv((int) vector.y(), Chunk.DEPTH),
+			Math.floorDiv((int) vector.z(), Chunk.HEIGHT)
 		);
 	}
 

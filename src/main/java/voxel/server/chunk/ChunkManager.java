@@ -51,4 +51,14 @@ public class ChunkManager {
 		return storage.values();
 	}
 
+	public Collection<ServerChunk> getNear(ChunkPosition center, int radius) {
+		final var centerVector = center.toFloatVector();
+		final var maxDistance = Math.pow(radius, 2);
+
+		return storage.values()
+			.stream()
+			.filter((chunk) -> chunk.getPosition().toFloatVector().distanceSquared(centerVector) < maxDistance)
+			.toList();
+	}
+
 }

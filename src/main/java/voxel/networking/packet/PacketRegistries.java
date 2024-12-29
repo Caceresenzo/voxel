@@ -5,23 +5,29 @@ import static voxel.networking.packet.ConnectionState.LOGIN;
 import static voxel.networking.packet.ConnectionState.PLAY;
 import static voxel.networking.packet.ConnectionState.STATUS;
 
+import lombok.experimental.UtilityClass;
 import voxel.networking.packet.clientbound.login.LoginSuccessPacket;
 import voxel.networking.packet.clientbound.other.PongPacket;
 import voxel.networking.packet.clientbound.play.BlockUpdatePacket;
 import voxel.networking.packet.clientbound.play.ChunkDataPacket;
+import voxel.networking.packet.clientbound.play.GameEventPacket;
 import voxel.networking.packet.clientbound.play.LoginPacket;
 import voxel.networking.packet.clientbound.play.PlayerInfoUpdatePacket;
+import voxel.networking.packet.clientbound.play.SetCenterChunkPacket;
+import voxel.networking.packet.clientbound.play.SynchronizePlayerPositionPacket;
 import voxel.networking.packet.clientbound.play.UpdateEntityPositionAndRotationPacket;
 import voxel.networking.packet.clientbound.status.StatusResponsePacket;
 import voxel.networking.packet.serverbound.handshake.HandshakePacket;
 import voxel.networking.packet.serverbound.login.LoginAcknowledgedPacket;
 import voxel.networking.packet.serverbound.login.LoginStartPacket;
+import voxel.networking.packet.serverbound.other.ConfirmTeleportationPacket;
 import voxel.networking.packet.serverbound.other.PingPacket;
 import voxel.networking.packet.serverbound.play.PlayerActionPacket;
 import voxel.networking.packet.serverbound.play.SetPlayerPositionAndRotationPacket;
 import voxel.networking.packet.serverbound.play.UseItemOnPacket;
 import voxel.networking.packet.serverbound.status.StatusRequestPacket;
 
+@UtilityClass
 public class PacketRegistries {
 
 	public static final PacketRegistry SERVER_BOUND = new PacketRegistry();
@@ -40,14 +46,18 @@ public class PacketRegistries {
 		CLIENT_BOUND.register(LOGIN, 0x02, LoginSuccessPacket.class, LoginSuccessPacket.SERIALIZER);
 		SERVER_BOUND.register(LOGIN, 0x03, LoginAcknowledgedPacket.class, LoginAcknowledgedPacket.SERIALIZER);
 
+		SERVER_BOUND.register(PLAY, 0x00, ConfirmTeleportationPacket.class, ConfirmTeleportationPacket.SERIALIZER);
 		CLIENT_BOUND.register(PLAY, 0x09, BlockUpdatePacket.class, BlockUpdatePacket.SERIALIZER);
 		SERVER_BOUND.register(PLAY, 0x17, SetPlayerPositionAndRotationPacket.class, SetPlayerPositionAndRotationPacket.SERIALIZER);
+		CLIENT_BOUND.register(PLAY, 0x20, GameEventPacket.class, GameEventPacket.SERIALIZER);
 		CLIENT_BOUND.register(PLAY, 0x2d, UpdateEntityPositionAndRotationPacket.class, UpdateEntityPositionAndRotationPacket.SERIALIZER);
 		SERVER_BOUND.register(PLAY, 0x21, PlayerActionPacket.class, PlayerActionPacket.SERIALIZER);
 		CLIENT_BOUND.register(PLAY, 0x25, ChunkDataPacket.class, ChunkDataPacket.SERIALIZER);
 		CLIENT_BOUND.register(PLAY, 0x29, LoginPacket.class, LoginPacket.SERIALIZER);
 		SERVER_BOUND.register(PLAY, 0x35, UseItemOnPacket.class, UseItemOnPacket.SERIALIZER);
 		CLIENT_BOUND.register(PLAY, 0x3c, PlayerInfoUpdatePacket.class, PlayerInfoUpdatePacket.SERIALIZER);
+		CLIENT_BOUND.register(PLAY, 0x3E, SynchronizePlayerPositionPacket.class, SynchronizePlayerPositionPacket.SERIALIZER);
+		CLIENT_BOUND.register(PLAY, 0x52, SetCenterChunkPacket.class, SetCenterChunkPacket.SERIALIZER);
 	}
 
 }
